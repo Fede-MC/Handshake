@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Interactiva UTN</title>
+    <style>
+        :root { --color-primary: #005A9C; --color-secondary: #0D223F; --color-accent: #FFC107; --color-light: #f4f4f4; --color-dark: #333; --color-correct: #28a745; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--color-light); color: var(--color-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; margin: 0; }
+        #app-container { width: 100%; max-width: 800px; margin: 1rem; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .view { display: none; padding: 2rem; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; }
+        .view.active { display: flex; }
+        h1, h2, h3 { color: var(--color-secondary); margin-bottom: 1rem; }
+        p { margin-bottom: 1.5rem; line-height: 1.6; color: #555; }
+        button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; margin-top: 10px; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        input { width: 100%; padding: 0.8rem; border: 2px solid #ccc; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; text-align: center; max-width: 300px; }
+        /* --- Estilos específicos del Profesor --- */
+        #lobby-header { width: 100%; padding: 1rem; background-color: #f0f0f0; border-radius: 10px; margin-bottom: 2rem; }
+        #game-code { color: var(--color-primary); font-size: 3rem; font-weight: bold; letter-spacing: 5px; user-select: all; }
+        #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; }
+        #player-lobby-list li { background: #e0e0e0; padding: 0.5rem 1rem; border-radius: 20px; }
+        #results-chart { width: 100%; max-width: 600px; margin-top: 1rem; }
+        .bar-container { display: flex; align-items: center; margin-bottom: 0.5rem; }
+        .bar-label { width: 25%; text-align: right; padding-right: 10px; font-size: 0.9em; }
+        .bar { height: 30px; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; border-radius: 0 5px 5px 0; transition: width 0.5s ease; }
+        .bar.correct { background-color: var(--color-correct); }
+        #scoreboard { list-style: none; width: 100%; max-width: 500px; padding: 0; text-align: left; }
+        #scoreboard li { background-color: var(--color-light); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; }
+        #scoreboard li span { display: block; }
+        #scoreboard li .rank-name { font-size: 1.2rem; }
+        #scoreboard li .rank-details { font-size: 0.9rem; color: #555; }
+    </style>
+</head>
+<body>
+    <main id="app-container">
+        <!-- VISTA DEL PROFESOR -->
+        <div id="profesor-view" class="view">
+            <section id="prof-init-screen" class="view active">
+                <h1>Panel del Profesor</h1><p>Crea una sala de juego para empezar la trivia.</p><button id="create-game-btn">Crear Juego</button>
+            </section>
+            <section id="prof-lobby-screen" class="view">
+                <div id="lobby-header"><h3>Pide a tus estudiantes que abran la misma URL e ingresen este código:</h3><p><strong id="game-code"></strong></p></div>
+                <h2>Sala de Espera</h2><p>Jugadores conectados:</p><ul id="player-lobby-list"></ul><button id="start-game-btn" disabled>Empezar Juego (mín. 1 jugador)</button>
+            </section>
+            <section id="prof-game-screen" class="view">
+                <h2 id="question-text-prof"></h2><p>Respuestas: <span id="response-count">0</span> / <span id="total-players">0</span></p><div id="results-chart"></div><button id="next-question-btn" style="display: none;">Siguiente Pregunta</button><button id="show-ranking-btn" style="display: none;">Ver Ranking Final</button>
+            </section>
+            <section id="prof-ranking-screen" class="view">
+                <h2>Ranking Final (Top 5)</h2><ol id="scoreboard"></ol><button onclick="location.href = location.pathname">Crear Nuevo Juego</button>
+            </section>
+        </div>
+
+        <!-- VISTA DEL ESTUDIANTE -->
+        <div id="estudiante-view" class="view">
+            <section id="stud-join-screen" class="view active">
+                <h1>Unirse a la Trivia</h1><p>Ingresa tu nombre y el código de la sala que te dio el profesor.</p><input type="text" id="player-name" placeholder="Tu Nombre" required><input type="text" id="game-code-input" placeholder="Código de la Sala" required><button id="join-btn">Unirse</button>
+            </section>
+            <section id="stud-waiting-screen" class="view"><h2>¡Conectado!</h2><p>Esperando que el profesor inicie el juego...</p></section>
+            <section id="stud-question-screen" class="view"><div id="options-container"></div></section>
+            <section id="stud-answer-sent-screen" class="view"><h2>Respuesta enviada</h2><p>Esperando los resultados...</p></section>
+            <section id="stud-end-screen" class="view"><h2>¡Juego terminado!</h2><p>El profesor mostrará el ranking final en la pantalla principal.</p></section>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBG_fLl8uTo3ra3nLvB28KX39Tm6ygjmOo",
+            authDomain: "juego-trivia-utn-clase-12.firebaseapp.com",
+            projectId: "juego-trivia-utn-clase-12",
+            storageBucket: "juego-trivia-utn-clase-12.appspot.com",
+            messagingSenderId: "773704295120",
+            appId: "1:773704295120:web:52003bc5f325e2ca9434d5",
+            measurementId: "G-HY3V2T781F"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const questions = [
+            { category: 'Virtualización', text: '¿Cuál es el propósito principal de la virtualización?', options: ['Hacer una PC más grande', 'Ejecutar múltiples SO en un hardware', 'Aumentar velocidad de internet', 'Crear copias de archivos'], correct: 1 },
+            { category: 'Hipervisor', text: 'Un hipervisor de Tipo 1 se ejecuta...', options: ['Dentro de Windows/Linux', 'Solo en la nube', 'Directamente sobre el hardware', 'Únicamente en VMs'], correct: 2 },
+            { category: 'IA 101', text: 'Una IA para una tarea específica se conoce como:', options: ['IA General (AGI)', 'Superinteligencia (ASI)', 'IA Débil o Estrecha (ANI)', 'IA Cognitiva'], correct: 2 },
+            { category: 'Machine Learning', text: '¿Qué caracteriza al Machine Learning?', options: ['Sigue reglas fijas', 'Aprende de los datos', 'Solo funciona con imágenes', 'Requiere intervención humana'], correct: 1 },
+            { category: 'Hipervisor', text: '¿Cuál es un ejemplo de hipervisor de Tipo 2 (alojado)?', options: ['VMware ESXi', 'Hyper-V Server', 'Oracle VirtualBox', 'KVM'], correct: 2 }
+        ];
+
+        window.onload = () => {
+            document.getElementById('profesor-view').style.display = 'block';
+            initProfesor();
+            document.getElementById('estudiante-view').style.display = 'block';
+            initEstudiante();
+        };
+
+        function initProfesor() {
+            const createGameBtn = document.getElementById('create-game-btn');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const nextQuestionBtn = document.getElementById('next-question-btn');
+            const showRankingBtn = document.getElementById('show-ranking-btn');
+            let gameCode, currentQuestionIndex = -1, playersUnsubscribe, responsesUnsubscribe, totalPlayers = 0;
+
+            function switchProfScreen(id) { document.querySelectorAll('#profesor-view .view').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+            async function createGame() {
+                createGameBtn.disabled = true;
+                gameCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+                document.getElementById('game-code').textContent = gameCode;
+                await db.collection('games').doc(gameCode).set({ state: 'lobby', currentQuestion: -1, players: {}, questions: questions });
+                switchProfScreen('prof-lobby-screen');
+                listenForPlayers();
+            }
+            function listenForPlayers() {
+                playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => {
+                    const players = doc.data()?.players ? Object.keys(doc.data().players) : [];
+                    totalPlayers = players.length;
+                    document.getElementById('player-lobby-list').innerHTML = players.map(name => `<li>${name}</li>`).join('');
+                    startGameBtn.disabled = totalPlayers === 0;
+                });
+            }
+            async function startGame() { if (playersUnsubscribe) playersUnsubscribe(); currentQuestionIndex = 0; await launchQuestion(); }
+            async function launchQuestion() {
+                nextQuestionBtn.style.display = 'none'; showRankingBtn.style.display = 'none';
+                document.getElementById('results-chart').innerHTML = '';
+                await db.collection('games').doc(gameCode).update({ state: 'question', currentQuestion: currentQuestionIndex });
+                const question = questions[currentQuestionIndex];
+                document.getElementById('question-text-prof').textContent = `(${question.category}) ${question.text}`;
+                document.getElementById('total-players').textContent = totalPlayers;
+                document.getElementById('response-count').textContent = 0;
+                switchProfScreen('prof-game-screen');
+                listenForResponses();
+            }
+            function listenForResponses() {
+                const qResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${currentQuestionIndex}`);
+                responsesUnsubscribe = qResponsesRef.onSnapshot(doc => {
+                    const responseCount = doc.exists ? Object.keys(doc.data()).length : 0;
+                    document.getElementById('response-count').textContent = responseCount;
+                    if (responseCount >= totalPlayers) showResults();
+                });
+            }
+            async function showResults() {
+                if (responsesUnsubscribe) responsesUnsubscribe();
+                const question = questions[currentQuestionIndex];
+                const responsesDoc = await db.collection('games').doc(gameCode).collection('responses').doc(`q${currentQuestionIndex}`).get();
+                const responsesData = responsesDoc.exists ? responsesDoc.data() : {};
+                const gameRef = db.collection('games').doc(gameCode);
+                const gameDoc = await gameRef.get();
+                let playersData = gameDoc.data().players;
+                for (const name in responsesData) {
+                    let pData = playersData[name];
+                    if (responsesData[name] === question.correct) {
+                        pData.score += 10; pData.correct += 1;
+                    } else { pData.incorrect += 1; }
+                }
+                await gameRef.update({ players: playersData });
+                const voteCounts = question.options.map(() => 0);
+                for (const name in responsesData) voteCounts[responsesData[name]]++;
+                document.getElementById('results-chart').innerHTML = question.options.map((opt, i) => `<div class="bar-container"><div class="bar-label">${opt}</div><div class="bar ${i === question.correct ? 'correct' : ''}" style="width: ${totalPlayers > 0 ? (voteCounts[i] / totalPlayers) * 100 : 0}%;">${voteCounts[i]}</div></div>`).join('');
+                if (currentQuestionIndex < questions.length - 1) nextQuestionBtn.style.display = 'block';
+                else { showRankingBtn.style.display = 'block'; gameRef.update({ state: 'finished' }); }
+            }
+            async function showFinalRanking() {
+                const playersData = (await db.collection('games').doc(gameCode).get()).data().players;
+                const sortedPlayers = Object.entries(playersData).sort((a, b) => b[1].score - a[1].score).slice(0, 5);
+                document.getElementById('scoreboard').innerHTML = sortedPlayers.map(([name, data], index) => `<li><span class="rank-name">${index + 1}. ${name}</span><span class="rank-details">${data.score} pts (Aciertos: ${data.correct}, Errores: ${data.incorrect})</span></li>`).join('');
+                switchProfScreen('prof-ranking-screen');
+            }
+            createGameBtn.addEventListener('click', createGame);
+            startGameBtn.addEventListener('click', startGame);
+            nextQuestionBtn.addEventListener('click', () => { currentQuestionIndex++; launchQuestion(); });
+            showRankingBtn.addEventListener('click', showFinalRanking);
+        }
+
+        function initEstudiante() {
+            const playerNameInput = document.getElementById('player-name');
+            const gameCodeInput = document.getElementById('game-code-input');
+            const joinBtn = document.getElementById('join-btn');
+            let gameCode, playerName, gameUnsubscribe;
+            function switchStudScreen(id) { document.querySelectorAll('#estudiante-view .view').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+            async function joinGame() {
+                playerName = playerNameInput.value.trim();
+                gameCode = gameCodeInput.value.trim().toUpperCase();
+                if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; }
+                joinBtn.disabled = true; joinBtn.textContent = 'Conectando...';
+                try {
+                    const gameRef = db.collection('games').doc(gameCode);
+                    if (!(await gameRef.get()).exists) { throw new Error('La sala no existe.'); }
+                    await gameRef.set({ players: { [playerName]: { score: 0, correct: 0, incorrect: 0 } } }, { merge: true });
+                    listenToGameChanges();
+                    switchStudScreen('stud-waiting-screen');
+                } catch (error) {
+                    alert(error.message);
+                    joinBtn.disabled = false; joinBtn.textContent = 'Unirse';
+                }
+            }
+            function listenToGameChanges() {
+                gameUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => {
+                    const gameData = doc.data();
+                    if (!gameData) { location.reload(); return; }
+                    if (gameData.state === 'question') {
+                        db.collection('games').doc(gameCode).collection('responses').doc(`q${gameData.currentQuestion}`).get().then(responseDoc => {
+                            if (responseDoc.exists && responseDoc.data()[playerName] !== undefined) switchStudScreen('stud-answer-sent-screen');
+                            else displayQuestion(gameData.questions[gameData.currentQuestion]);
+                        });
+                    } else if (gameData.state === 'lobby') switchStudScreen('stud-waiting-screen');
+                    else if (gameData.state === 'finished') { if(gameUnsubscribe) gameUnsubscribe(); switchStudScreen('stud-end-screen'); }
+                });
+            }
+            function displayQuestion(question) {
+                document.getElementById('options-container').innerHTML = question.options.map((opt, i) => `<button class="option-btn" onclick="sendAnswer(${i})">${opt}</button>`).join('');
+                switchStudScreen('stud-question-screen');
+            }
+            window.sendAnswer = async (answerIndex) => {
+                document.querySelectorAll('#options-container button').forEach(btn => btn.disabled = true);
+                const qIndex = (await db.collection('games').doc(gameCode).get()).data().currentQuestion;
+                await db.collection('games').doc(gameCode).collection('responses').doc(`q${qIndex}`).set({ [playerName]: answerIndex }, { merge: true });
+                switchStudScreen('stud-answer-sent-screen');
+            };
+            joinBtn.addEventListener('click', joinGame);
+            
+            // Lógica para que se muestre una vista u otra inicialmente
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('profesor') !== null) {
+                 document.getElementById('estudiante-view').style.display = 'none';
+            } else {
+                 document.getElementById('profesor-view').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
