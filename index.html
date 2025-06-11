@@ -6,29 +6,55 @@
     <title>Trivia Interactiva - UTN</title>
     <style>
         :root { --color-primary: #005A9C; --color-secondary: #0D223F; --color-accent: #FFC107; --color-light: #f4f4f4; --color-dark: #333; --color-correct: #28a745; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--color-light); color: var(--color-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .app-container { width: 100%; max-width: 800px; margin: 1rem; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; }
-        .screen { display: none; padding: 2rem; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; }
-        .screen.active { display: flex; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--color-light); color: var(--color-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; overflow: hidden; }
+        .app-container { width: 100%; max-width: 800px; margin: 1rem; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; position: relative; min-height: 500px; }
+        
+        /* --- Transiciones de Pantalla --- */
+        .screen {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; padding: 2rem;
+            flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            transform: translateY(15px);
+            pointer-events: none;
+        }
+        .screen.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+
         h1, h2 { color: var(--color-secondary); margin-bottom: 1rem; }
-        p { margin-bottom: 1.5rem; line-height: 1.6; color: #555; }
+        p { margin-bottom: 1.5rem; line-height: 1.6; color: #555; max-width: 600px; }
         input { width: 100%; max-width: 350px; padding: 0.8rem; border: 2px solid #ccc; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; text-align: center; }
         button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
-        /* Estilos específicos del profesor */
-        #lobby-header { margin-bottom: 2rem; }
+
+        /* --- Ruleta / Selección de Categorías --- */
+        #category-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; max-width: 600px; }
+        .category-btn { padding: 2rem; font-size: 1.2rem; border-radius: 10px; border: 2px solid var(--color-secondary); }
+        .category-btn:hover:not(:disabled) { background-color: var(--color-secondary); transform: scale(1.05); }
+
+        /* --- Estilos del Juego (Profesor) --- */
         #lobby-game-code { color: var(--color-primary); font-weight: bold; background-color: #eee; padding: 10px 20px; border-radius: 8px; font-size: 2.5rem; font-family: 'Courier New', Courier, monospace; letter-spacing: 4px; }
         #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; max-width: 600px; }
         #player-lobby-list li { background: #e0e0e0; padding: 0.5rem 1rem; border-radius: 20px; }
+        #timer-prof, #question-timer-stud { font-size: 2rem; font-weight: bold; color: var(--color-primary); margin-bottom: 1rem; }
         #results-chart { width: 100%; max-width: 600px; margin-top: 1rem; }
         .bar-container { display: flex; align-items: center; margin-bottom: 0.5rem; }
-        .bar-label { width: 25%; text-align: right; padding-right: 10px; font-size: 0.9rem;}
+        .bar-label { width: 30%; text-align: right; padding-right: 10px; font-size: 0.9rem;}
         .bar { height: 30px; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; border-radius: 0 5px 5px 0; transition: width 0.5s ease; }
         .bar.correct { background-color: var(--color-correct); }
-        #scoreboard { list-style: decimal; width: 100%; max-width: 400px; padding-left: 20px; text-align: left; }
-        #scoreboard li { background-color: var(--color-light); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; }
+        
+        /* --- Ranking Avanzado --- */
+        #scoreboard { list-style: none; width: 100%; max-width: 500px; padding: 0; text-align: left; }
+        #scoreboard li { background-color: var(--color-light); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         #scoreboard li:nth-child(1) { background-color: #ffd700; }
-        /* Estilos específicos del estudiante */
+        #scoreboard li:nth-child(2) { background-color: #c0c0c0; }
+        #scoreboard li:nth-child(3) { background-color: #cd7f32; color: white; }
+        #scoreboard .player-name { font-size: 1.2rem; }
+        #scoreboard .player-stats { font-size: 0.9rem; color: #555; text-align: right; }
+        
+        /* --- Estilos del Estudiante --- */
+        #question-text-stud { font-size: 1.5rem; margin: 1rem 0; word-wrap: break-word; overflow-y: auto; max-height: 150px; }
         #options-container { display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%; max-width: 400px; }
         .option-btn { width: 100%; padding: 1.2rem; font-size: 1.1rem; }
     </style>
@@ -37,7 +63,7 @@
     <div class="app-container">
         <!-- ===== INTERFAZ DEL PROFESOR (Oculta por defecto) ===== -->
         <div id="profesor-view" style="display: none;">
-            <section id="init-screen-prof" class="screen">
+            <section id="init-screen-prof" class="screen active">
                 <h1>Panel del Profesor</h1>
                 <p>Crea una nueva sala de juego para empezar.</p>
                 <button id="create-game-btn">Crear Juego</button>
@@ -50,17 +76,23 @@
                 </div>
                 <h3>Jugadores Conectados:</h3>
                 <ul id="player-lobby-list"></ul>
-                <button id="start-game-btn" disabled>Empezar Juego (mín. 1 jugador)</button>
+                <button id="start-game-btn" disabled>Empezar Juego</button>
+            </section>
+            <section id="category-screen-prof" class="screen">
+                <h2>Ronda <span id="round-number">1</span>/<span id="total-rounds">5</span> - Elige una Categoría</h2>
+                <div id="category-container"></div>
             </section>
             <section id="game-screen-prof" class="screen">
+                <div id="timer-prof">20</div>
                 <h2 id="question-text-prof"></h2>
                 <p>Respuestas: <span id="response-count">0</span> / <span id="total-players">0</span></p>
                 <div id="results-chart"></div>
-                <button id="next-question-btn" style="display: none;">Siguiente Pregunta</button>
+                <button id="force-end-btn">Terminar y Ver Resultados</button>
+                <button id="next-round-btn" style="display: none;">Siguiente Ronda</button>
                 <button id="show-ranking-btn" style="display: none;">Ver Ranking Final</button>
             </section>
             <section id="ranking-screen-prof" class="screen">
-                <h2>Ranking Final</h2>
+                <h2>Ranking Final - Top 5</h2>
                 <ol id="scoreboard"></ol>
                 <button onclick="window.location.href=window.location.pathname + '?teach'">Crear Nuevo Juego</button>
             </section>
@@ -68,7 +100,7 @@
 
         <!-- ===== INTERFAZ DEL ESTUDIANTE (Oculta por defecto) ===== -->
         <div id="estudiante-view" style="display: none;">
-            <section id="join-screen-stud" class="screen">
+            <section id="join-screen-stud" class="screen active">
                 <h1>Unirse al Juego</h1>
                 <input type="text" id="player-name" placeholder="Tu Nombre" required>
                 <input type="text" id="game-code-input" placeholder="Código de la Sala" required>
@@ -79,11 +111,13 @@
                 <p>Esperando que el profesor inicie el juego...</p>
             </section>
             <section id="question-screen-stud" class="screen">
+                <div id="question-timer-stud">20</div>
+                <h2 id="question-text-stud">Cargando pregunta...</h2>
                 <div id="options-container"></div>
             </section>
             <section id="answer-sent-screen-stud" class="screen">
                 <h2>Respuesta enviada</h2>
-                <p>Esperando los resultados...</p>
+                <p>Esperando que el profesor muestre los resultados...</p>
             </section>
             <section id="end-screen-stud" class="screen">
                 <h2>¡Juego terminado!</h2>
@@ -108,6 +142,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // =====================================================================
+        // ====================== LÓGICA DE ENRUTAMIENTO =======================
+        // =====================================================================
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('teach')) {
@@ -123,29 +160,76 @@
         // ======================= CÓDIGO DEL PROFESOR =========================
         // =====================================================================
         function initProfesor() {
-            const screens = { init: document.getElementById('init-screen-prof'), lobby: document.getElementById('lobby-screen-prof'), game: document.getElementById('game-screen-prof'), ranking: document.getElementById('ranking-screen-prof') };
+            // CONSTANTES Y VARIABLES
+            const TOTAL_ROUNDS = 5;
+            const QUESTION_TIME = 20;
+            const screens = { init: document.getElementById('init-screen-prof'), lobby: document.getElementById('lobby-screen-prof'), category: document.getElementById('category-screen-prof'), game: document.getElementById('game-screen-prof'), ranking: document.getElementById('ranking-screen-prof') };
             const createGameBtn = document.getElementById('create-game-btn');
             const lobbyGameCodeEl = document.getElementById('lobby-game-code');
             const playerLobbyList = document.getElementById('player-lobby-list');
             const startGameBtn = document.getElementById('start-game-btn');
+            const categoryContainer = document.getElementById('category-container');
+            const roundNumberEl = document.getElementById('round-number');
+            const totalRoundsEl = document.getElementById('total-rounds');
+            const timerProfEl = document.getElementById('timer-prof');
             const questionTextProf = document.getElementById('question-text-prof');
             const responseCountEl = document.getElementById('response-count');
             const totalPlayersEl = document.getElementById('total-players');
             const resultsChart = document.getElementById('results-chart');
-            const nextQuestionBtn = document.getElementById('next-question-btn');
+            const forceEndBtn = document.getElementById('force-end-btn');
+            const nextRoundBtn = document.getElementById('next-round-btn');
             const showRankingBtn = document.getElementById('show-ranking-btn');
             const scoreboard = document.getElementById('scoreboard');
 
-            let gameCode = null, currentQuestionIndex = -1, playersUnsubscribe = null, responsesUnsubscribe = null, totalPlayers = 0;
+            let gameCode, currentRound = 0, totalPlayers = 0;
+            let playersUnsubscribe, responsesUnsubscribe, questionTimer;
+            let questionsData = {};
+            let usedQuestions = {};
 
-            const questions = [
-                { category: 'Virtualización', text: '¿Cuál es el propósito principal de la virtualización?', options: ['Hacer una PC más grande', 'Ejecutar múltiples SO en un hardware', 'Aumentar velocidad de internet', 'Crear copias de archivos'], correct: 1 },
-                { category: 'Hipervisor', text: 'Un hipervisor de Tipo 1 se ejecuta...', options: ['Dentro de Windows/Linux', 'Solo en la nube', 'Directamente sobre el hardware', 'Únicamente en VMs'], correct: 2 },
-                { category: 'IA 101', text: 'Una IA para una tarea específica es:', options: ['IA General (AGI)', 'Superinteligencia (ASI)', 'IA Débil o Estrecha (ANI)', 'IA Cognitiva'], correct: 2 },
-                { category: 'Machine Learning', text: '¿Qué caracteriza al Machine Learning?', options: ['Sigue reglas fijas', 'Aprende de los datos', 'Solo funciona con imágenes', 'Requiere intervención humana'], correct: 1 },
-                { category: 'Hipervisor', text: '¿Cuál es un ejemplo de hipervisor de Tipo 2?', options: ['VMware ESXi', 'Hyper-V Server', 'Oracle VirtualBox', 'KVM'], correct: 2 }
-            ];
-
+            // BANCO DE PREGUNTAS
+            function loadQuestions() {
+                questionsData = {
+                    "Virtualización": [
+                        { text: '¿Cuál es el propósito principal de la virtualización?', options: ['Hacer una PC más grande', 'Ejecutar múltiples SO en un hardware', 'Aumentar velocidad de internet', 'Crear copias de archivos'], correct: 1 },
+                        { text: 'Una "VM" o Máquina Virtual es esencialmente...', options: ['Un computador completo emulado por software', 'Un tipo de antivirus', 'Una memoria física', 'Un componente del SO host'], correct: 0 },
+                        { text: '¿Qué componente de software crea y gestiona las VMs?', options: ['Sistema Operativo', 'Kernel', 'Hipervisor (VMM)', 'Firmware'], correct: 2 },
+                        { text: 'Según el texto, la virtualización es fundamental sobre todo en ambientes...', options: ['Académicos', 'De videojuegos', '"Cloud" (Nube)', 'Domésticos'], correct: 2 },
+                        { text: '¿Qué ventaja permite la virtualización al crear varios recursos desde un único servidor?', options: ['Mayor consumo de energía', 'Mejorar la escalabilidad', 'Reducir la seguridad', 'Aumentar costos'], correct: 1 },
+                        { text: '¿Qué significa que una VM es "independiente del hardware"?', options: ['No necesita hardware', 'Solo funciona en un tipo de hardware', 'Puede tener componentes virtuales distintos al físico', 'Usa los mismos drivers que el host'], correct: 2 },
+                        { text: 'El concepto de "encapsulamiento" en una VM facilita su...', options: ['Velocidad de procesamiento', 'Portabilidad y administración', 'Conexión a internet', 'Complejidad'], correct: 1 }
+                    ],
+                    "Hipervisores": [
+                        { text: 'Un hipervisor de Tipo 1, o "bare-metal", se ejecuta...', options: ['Dentro de Windows/Linux', 'Solo en la nube', 'Directamente sobre el hardware', 'Únicamente en VMs'], correct: 2 },
+                        { text: '¿Cuál es un ejemplo de hipervisor de Tipo 2 (alojado)?', options: ['VMware ESXi', 'Hyper-V Server', 'Oracle VirtualBox', 'KVM'], correct: 2 },
+                        { text: '¿Qué tipo de hipervisor ofrece, generalmente, mayor rendimiento?', options: ['Tipo 2 (alojado)', 'Tipo 1 (bare-metal)', 'Ambos por igual', 'Depende del SO invitado'], correct: 1 },
+                        { text: '¿Qué tipo de hipervisor es más adecuado para un usuario individual en su PC personal?', options: ['Tipo 2 (alojado)', 'Tipo 1 (bare-metal)', 'Bare-metal con KVM', 'Cualquiera'], correct: 0 },
+                        { text: '¿Dónde se encontraría más comúnmente un hipervisor de Tipo 1?', options: ['En un laptop de estudiante', 'En un centro de datos empresarial', 'En un smartphone', 'En todos'], correct: 1 },
+                        { text: 'Un hipervisor de Tipo 2 negocia los recursos con...', options: ['Otros hipervisores', 'Directamente con la CPU', 'El sistema operativo del host', 'El usuario final'], correct: 2 },
+                        { text: 'VMware Workstation y Fusion son ejemplos de...', options: ['Sistemas Operativos', 'Hardware de servidor', 'Hipervisores de Tipo 2', 'Hipervisores de Tipo 1'], correct: 2 }
+                    ],
+                    "Componentes y Ventajas": [
+                        { text: 'En virtualización, el hardware físico se denomina...', options: ['Guest', 'Cliente', 'Recurso', 'Host'], correct: 3 },
+                        { text: '¿Cuál de estas NO es una ventaja de las VMs mencionada en el texto?', options: ['Compatibilidad', 'Aislamiento', 'Encapsulamiento', 'Rendimiento siempre superior al físico'], correct: 3 },
+                        { text: 'El "aislamiento" de las VMs significa que si una falla...', options: ['Todas las demás fallan', 'El servidor físico se apaga', 'Las otras siguen disponibles', 'Se pierde la conexión de red'], correct: 2 },
+                        { text: '¿Qué son SDN y NFV?', options: ['Marcas de procesadores', 'Tipos de máquinas virtuales', 'Tipos de virtualización de red', 'Sistemas operativos para la nube'], correct: 2 },
+                        { text: 'La virtualización de almacenamiento agrupa varios discos físicos en...', options: ['Una sola carpeta', 'Un único clúster lógico', 'Una memoria RAM virtual', 'Un archivo comprimido'], correct: 1 },
+                        { text: 'La Infraestructura de Desktop Virtual (VDI) ejecuta los escritorios en...', options: ['La máquina del cliente', 'Un servidor central', 'Una memoria USB', 'El navegador web'], correct: 1 },
+                        { text: '¿Cuál es una desventaja potencial de la virtualización?', options: ['Mayor consumo energético total', 'Si el servidor físico se desconecta, todo se cae', 'Menor flexibilidad', 'Aprovisionamiento más lento'], correct: 1 }
+                    ],
+                    "Inteligencia Artificial": [
+                        { text: 'Una IA diseñada para una tarea específica, como un asistente virtual, se conoce como:', options: ['IA General (AGI)', 'Superinteligencia (ASI)', 'IA Débil o Estrecha (ANI)', 'IA Cognitiva'], correct: 2 },
+                        { text: '¿Qué subcampo de la IA utiliza redes neuronales con múltiples capas?', options: ['Sistemas Expertos', 'Robótica', 'Deep Learning', 'Procesamiento de Lenguaje Natural'], correct: 2 },
+                        { text: 'Según el texto, ChatGPT es un ejemplo de...', options: ['IA reactiva', 'Sistema experto', 'IA con conciencia propia', 'IA Generativa (Gen AI)'], correct: 3 },
+                        { text: '¿Cuál de estas es una característica de la IA?', options: ['Incapacidad de razonar', 'Capacidad de aprender', 'Siempre es 100% precisa', 'No puede procesar lenguaje'], correct: 1 },
+                        { text: 'El término "Inteligencia Artificial" fue acuñado en la década de...', options: ['1940', '1950', '1970', '1990'], correct: 1 },
+                        { text: 'Un sistema que imita la toma de decisiones humana en un área específica, como diagnóstico médico, es un...', options: ['Sistema experto', 'Red neuronal', 'Chatbot', 'Robot industrial'], correct: 0 },
+                        { text: 'El riesgo de que una IA genere contenido creíble pero incorrecto se llama...', options: ['Sesgo', 'Sobreajuste', 'Alucinación', 'Error de compilación'], correct: 2 }
+                    ]
+                };
+                for (const category in questionsData) { usedQuestions[category] = []; }
+            }
+            
+            // FUNCIONES DE CONTROL DEL JUEGO
             function switchScreen(screenName) {
                 Object.values(screens).forEach(s => s.classList.remove('active'));
                 screens[screenName].classList.add('active');
@@ -158,9 +242,8 @@
                 
                 await db.collection('games').doc(gameCode).set({
                     state: 'lobby',
-                    currentQuestion: -1,
+                    currentQuestion: null,
                     players: {},
-                    questions: questions
                 });
 
                 switchScreen('lobby');
@@ -170,8 +253,8 @@
             function listenForPlayers() {
                 playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => {
                     const gameData = doc.data();
-                    if (!gameData) return;
-                    const players = gameData.players ? Object.keys(gameData.players) : [];
+                    if (!gameData || !gameData.players) return;
+                    const players = Object.keys(gameData.players);
                     totalPlayers = players.length;
                     playerLobbyList.innerHTML = players.map(name => `<li>${name}</li>`).join('');
                     startGameBtn.disabled = players.length === 0;
@@ -180,29 +263,69 @@
 
             async function startGame() {
                 if (playersUnsubscribe) playersUnsubscribe();
-                currentQuestionIndex = 0;
-                await launchQuestion();
+                showCategorySelector();
             }
 
-            async function launchQuestion() {
-                nextQuestionBtn.style.display = 'none';
-                resultsChart.innerHTML = '';
+            function showCategorySelector() {
+                currentRound++;
+                if (currentRound > TOTAL_ROUNDS) {
+                    showFinalRanking();
+                    return;
+                }
+                roundNumberEl.textContent = currentRound;
+                totalRoundsEl.textContent = TOTAL_ROUNDS;
+                categoryContainer.innerHTML = '';
+                Object.keys(questionsData).forEach(category => {
+                    const catBtn = document.createElement('button');
+                    catBtn.className = 'category-btn';
+                    catBtn.textContent = category;
+                    catBtn.onclick = () => selectCategoryAndLaunch(category);
+                    categoryContainer.appendChild(catBtn);
+                });
+                switchScreen('category');
+            }
+
+            async function selectCategoryAndLaunch(category) {
+                const availableIndices = Object.keys(questionsData[category]).filter(i => !usedQuestions[category].includes(parseInt(i)));
+                if (availableIndices.length === 0) usedQuestions[category] = []; // Reset if all used
+                const qIndex = parseInt(availableIndices[Math.floor(Math.random() * availableIndices.length)]);
+                usedQuestions[category].push(qIndex);
+
+                const question = { ...questionsData[category][qIndex], category: category };
+
                 await db.collection('games').doc(gameCode).update({
                     state: 'question',
-                    currentQuestion: currentQuestionIndex
+                    currentQuestion: question
                 });
-                
-                const question = questions[currentQuestionIndex];
+                launchQuestion(question);
+            }
+
+            function launchQuestion(question) {
+                nextRoundBtn.style.display = 'none';
+                showRankingBtn.style.display = 'none';
+                resultsChart.innerHTML = '';
+                forceEndBtn.style.display = 'block';
+
                 questionTextProf.textContent = `(${question.category}) ${question.text}`;
                 totalPlayersEl.textContent = totalPlayers;
                 responseCountEl.textContent = 0;
                 
+                let timeLeft = QUESTION_TIME;
+                timerProfEl.textContent = timeLeft;
+                questionTimer = setInterval(() => {
+                    timeLeft--;
+                    timerProfEl.textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        showResults();
+                    }
+                }, 1000);
+
                 switchScreen('game');
                 listenForResponses();
             }
 
             function listenForResponses() {
-                const questionResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${currentQuestionIndex}`);
+                const questionResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`);
                 responsesUnsubscribe = questionResponsesRef.onSnapshot(doc => {
                     if (!doc.exists) return;
                     const responses = doc.data();
@@ -215,23 +338,30 @@
             }
 
             async function showResults() {
+                clearInterval(questionTimer);
+                forceEndBtn.style.display = 'none';
                 if (responsesUnsubscribe) responsesUnsubscribe();
-
-                const question = questions[currentQuestionIndex];
-                const responsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${currentQuestionIndex}`);
-                const responsesDoc = await responsesRef.get();
-                const responsesData = responsesDoc.data();
 
                 const gameRef = db.collection('games').doc(gameCode);
                 const gameDoc = await gameRef.get();
                 const gameData = gameDoc.data();
-                
+                const question = gameData.currentQuestion;
+
+                const responsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`);
+                const responsesDoc = await responsesRef.get();
+                const responsesData = responsesDoc.data();
+
                 let playerUpdates = {};
                 if (responsesData) {
-                    for (const playerName in responsesData) {
-                        const currentScore = gameData.players[playerName] || 0;
-                        if (responsesData[playerName] === question.correct) {
-                            playerUpdates[`players.${playerName}`] = currentScore + 10;
+                    for (const playerName of Object.keys(gameData.players)) {
+                        const playerData = gameData.players[playerName];
+                        const playerAnswer = responsesData[playerName];
+                        
+                        if (playerAnswer === question.correct) {
+                            playerUpdates[`players.${playerName}.score`] = (playerData.score || 0) + 10;
+                            playerUpdates[`players.${playerName}.correct`] = (playerData.correct || 0) + 1;
+                        } else {
+                            playerUpdates[`players.${playerName}.incorrect`] = (playerData.incorrect || 0) + 1;
                         }
                     }
                 }
@@ -247,48 +377,43 @@
                         }
                     }
                 }
-
+                
                 resultsChart.innerHTML = '';
                 question.options.forEach((option, index) => {
                     const percentage = totalPlayers > 0 ? (voteCounts[index] / totalPlayers) * 100 : 0;
                     const isCorrect = index === question.correct;
                     const bar = document.createElement('div');
                     bar.className = 'bar-container';
-                    bar.innerHTML = `
-                        <div class="bar-label">${option}</div>
-                        <div class="bar ${isCorrect ? 'correct' : ''}" style="width: ${percentage}%;">
-                            ${voteCounts[index]}
-                        </div>
-                    `;
+                    bar.innerHTML = `<div class="bar-label">${option}</div><div class="bar ${isCorrect ? 'correct' : ''}" style="width: ${percentage}%;">${voteCounts[index]}</div>`;
                     resultsChart.appendChild(bar);
                 });
 
-                if (currentQuestionIndex < questions.length - 1) {
-                    nextQuestionBtn.style.display = 'block';
+                if (currentRound < TOTAL_ROUNDS) {
+                    nextRoundBtn.style.display = 'block';
                 } else {
-                    await db.collection('games').doc(gameCode).update({ state: 'finished' });
+                    await gameRef.update({ state: 'finished' });
                     showRankingBtn.style.display = 'block';
                 }
-            }
-            
-            async function nextQuestion() {
-                currentQuestionIndex++;
-                await launchQuestion();
             }
             
             async function showFinalRanking() {
                 const gameDoc = await db.collection('games').doc(gameCode).get();
                 const playersData = gameDoc.data().players;
-                const sortedPlayers = Object.entries(playersData).sort((a, b) => b[1] - a[1]);
+                const sortedPlayers = Object.entries(playersData)
+                    .map(([name, data]) => ({ name, score: data.score || 0, correct: data.correct || 0, incorrect: data.incorrect || 0 }))
+                    .sort((a, b) => (b.score - a.score) || (b.correct - a.correct) || (a.incorrect - b.incorrect));
                 
-                scoreboard.innerHTML = sortedPlayers.map(([name, score], index) => `<li>${index + 1}. ${name}: ${score} pts</li>`).join('');
+                scoreboard.innerHTML = sortedPlayers.slice(0, 5).map((p, i) => `<li><span class="player-name">${i + 1}. ${p.name}</span><span class="player-stats">${p.score} pts (${p.correct} ✔ / ${p.incorrect} ✖)</span></li>`).join('');
                 switchScreen('ranking');
             }
 
+            // INICIALIZACIÓN DEL PROFESOR
+            loadQuestions();
             switchScreen('init');
             createGameBtn.addEventListener('click', createGame);
             startGameBtn.addEventListener('click', startGame);
-            nextQuestionBtn.addEventListener('click', nextQuestion);
+            forceEndBtn.addEventListener('click', showResults);
+            nextRoundBtn.addEventListener('click', showCategorySelector);
             showRankingBtn.addEventListener('click', showFinalRanking);
         }
 
@@ -296,13 +421,16 @@
         // ====================== CÓDIGO DEL ESTUDIANTE ========================
         // =====================================================================
         function initEstudiante() {
+            const QUESTION_TIME = 20;
             const screens = { join: document.getElementById('join-screen-stud'), waiting: document.getElementById('waiting-screen-stud'), question: document.getElementById('question-screen-stud'), answerSent: document.getElementById('answer-sent-screen-stud'), end: document.getElementById('end-screen-stud') };
             const playerNameInput = document.getElementById('player-name');
             const gameCodeInput = document.getElementById('game-code-input');
             const joinBtn = document.getElementById('join-btn');
+            const questionTimerStudEl = document.getElementById('question-timer-stud');
+            const questionTextStud = document.getElementById('question-text-stud');
             const optionsContainer = document.getElementById('options-container');
 
-            let gameCode = null, playerName = null, gameUnsubscribe = null;
+            let gameCode, playerName, gameUnsubscribe, questionTimerStud;
 
             function switchScreen(screenName) {
                 Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -312,36 +440,17 @@
             async function joinGame() {
                 playerName = playerNameInput.value.trim();
                 gameCode = gameCodeInput.value.trim().toUpperCase();
-
-                if (!playerName || !gameCode) {
-                    alert('Por favor, ingresa tu nombre y el código de la sala.');
-                    return;
-                }
-
+                if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; }
                 joinBtn.disabled = true;
                 joinBtn.textContent = 'Conectando...';
-
                 try {
                     const gameRef = db.collection('games').doc(gameCode);
                     const gameDoc = await gameRef.get();
-
-                    if (!gameDoc.exists) {
-                        alert('La sala no existe. Verifica el código.');
-                        joinBtn.disabled = false;
-                        joinBtn.textContent = 'Unirse';
-                        return;
-                    }
-                    
-                    await gameRef.update({
-                        [`players.${playerName}`]: 0
-                    });
-
+                    if (!gameDoc.exists) { throw new Error('La sala no existe.'); }
+                    await gameRef.update({ [`players.${playerName}`]: { score: 0, correct: 0, incorrect: 0 } });
                     listenToGameChanges();
-                    switchScreen('waiting');
-
                 } catch (error) {
-                    console.error("Error al unirse a la sala:", error);
-                    alert("Hubo un error al conectar. Revisa la consola o intenta de nuevo.");
+                    alert(error.message);
                     joinBtn.disabled = false;
                     joinBtn.textContent = 'Unirse';
                 }
@@ -350,62 +459,62 @@
             function listenToGameChanges() {
                 const gameRef = db.collection('games').doc(gameCode);
                 gameUnsubscribe = gameRef.onSnapshot((doc) => {
-                    if (!doc.exists) {
-                        if (gameUnsubscribe) gameUnsubscribe();
-                        alert("La sala de juego ha sido cerrada.");
-                        location.reload();
-                        return;
-                    }
+                    if (!doc.exists) { if (gameUnsubscribe) gameUnsubscribe(); alert("La sala de juego ha sido cerrada."); location.reload(); return; }
                     const gameData = doc.data();
 
                     if (gameData.state === 'question') {
-                        const responseRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${gameData.currentQuestion}`);
+                        const responseRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${gameData.currentQuestion.category ? gameData.currentQuestion.category.length + gameData.currentQuestion.text.length : 0}`); // Usa un ID basado en la ronda real
                         responseRef.get().then(responseDoc => {
                             if (responseDoc.exists && responseDoc.data()[playerName] !== undefined) {
                                 switchScreen('answerSent');
                             } else {
-                                const question = gameData.questions[gameData.currentQuestion];
-                                displayQuestion(question);
+                                displayQuestion(gameData.currentQuestion);
                             }
                         });
                     } else if (gameData.state === 'finished') {
-                        if (gameUnsubscribe) gameUnsubscribe();
-                        switchScreen('end');
+                        if (gameUnsubscribe) gameUnsubscribe(); switchScreen('end');
                     } else if (gameData.state === 'lobby') {
                         switchScreen('waiting');
                     }
-                }, (error) => {
-                    console.error("Error de conexión con la sala:", error);
-                    if (gameUnsubscribe) gameUnsubscribe();
-                    alert("Se perdió la conexión con la sala.");
-                    location.reload();
                 });
             }
             
             function displayQuestion(question) {
+                if (!question) return;
+                clearInterval(questionTimerStud);
+                questionTextStud.textContent = question.text;
                 optionsContainer.innerHTML = '';
                 question.options.forEach((option, index) => {
                     const button = document.createElement('button');
                     button.className = 'option-btn';
                     button.textContent = option;
-                    button.onclick = () => sendAnswer(index);
+                    button.onclick = () => sendAnswer(index, question);
                     optionsContainer.appendChild(button);
                 });
+
+                let timeLeft = QUESTION_TIME;
+                questionTimerStudEl.textContent = timeLeft;
+                questionTimerStud = setInterval(() => {
+                    timeLeft--;
+                    questionTimerStudEl.textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(questionTimerStud);
+                        optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                        switchScreen('answerSent'); // Se acabó el tiempo
+                    }
+                }, 1000);
                 switchScreen('question');
             }
             
-            async function sendAnswer(answerIndex) {
+            async function sendAnswer(answerIndex, question) {
+                clearInterval(questionTimerStud);
                 optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true);
-
-                const gameData = (await db.collection('games').doc(gameCode).get()).data();
-                const questionIndex = gameData.currentQuestion;
                 
-                const responseRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${questionIndex}`);
-                
-                await responseRef.set({
-                    [playerName]: answerIndex
-                }, { merge: true });
+                const gameDoc = await db.collection('games').doc(gameCode).get();
+                const currentRoundId = `r${gameDoc.data().currentQuestion.category.length + gameDoc.data().currentQuestion.text.length}`;
 
+                const responseRef = db.collection('games').doc(gameCode).collection('responses').doc(currentRoundId);
+                await responseRef.set({ [playerName]: answerIndex }, { merge: true });
                 switchScreen('answerSent');
             }
 
