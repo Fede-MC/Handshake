@@ -8,9 +8,8 @@
         :root { --color-primary: #005A9C; --color-secondary: #0D223F; --color-accent: #FFC107; --color-light: #f4f4f4; --color-dark: #333; --color-correct: #28a745; }
         html, body { height: 100%; margin: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--color-light); color: var(--color-dark); display: flex; justify-content: center; align-items: center; text-align: center; }
-        .app-container { width: 100%; max-width: 800px; height: 100%; max-height: 900px; margin: 1rem; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .app-container { width: 100%; max-width: 800px; height: 100%; max-height: 900px; margin: auto; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; position: relative; display: flex; flex-direction: column; }
         
-        /* --- Transiciones de Pantalla --- */
         .screen {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -29,13 +28,11 @@
         button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
 
-        /* --- Ruleta de Categorías --- */
-        #wheel-container { position: relative; width: 300px; height: 300px; margin: 2rem auto; }
+        #wheel-container { position: relative; width: 300px; height: 300px; margin: 1rem auto; }
         #wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.2); transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; }
         .category-slice { position: absolute; width: 50%; height: 50%; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; transform-origin: 100% 100%; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); padding-right: 20px; text-align: right; }
         #wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--color-secondary); z-index: 10; }
 
-        /* --- Estilos del Juego (Profesor) --- */
         #lobby-game-code { color: var(--color-primary); font-weight: bold; background-color: #eee; padding: 10px 20px; border-radius: 8px; font-size: 2.5rem; font-family: 'Courier New', Courier, monospace; letter-spacing: 4px; }
         #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; max-width: 600px; }
         #player-lobby-list li { background: #e0e0e0; padding: 0.5rem 1rem; border-radius: 20px; }
@@ -46,7 +43,6 @@
         .bar { height: 30px; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; border-radius: 0 5px 5px 0; transition: width 0.5s ease; }
         .bar.correct { background-color: var(--color-correct); }
         
-        /* --- Ranking Avanzado --- */
         #scoreboard { list-style: none; width: 100%; max-width: 500px; padding: 0; text-align: left; }
         #scoreboard li { background-color: var(--color-light); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         #scoreboard li:nth-child(1) { background-color: #ffd700; }
@@ -55,14 +51,13 @@
         #scoreboard .player-name { font-size: 1.2rem; }
         #scoreboard .player-stats { font-size: 0.9rem; color: #555; text-align: right; }
         
-        /* --- Estilos del Estudiante --- */
         #question-text-stud { font-size: 1.5rem; margin: 1rem 0; word-wrap: break-word; overflow-y: auto; max-height: 150px; }
         #options-container { display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%; max-width: 400px; }
         .option-btn { width: 100%; padding: 1.2rem; font-size: 1.1rem; }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.5rem; }
-            h2 { font-size: 1.2rem; }
+            .app-container { border-radius: 0; margin: 0; height: 100%; max-height: 100%;}
+            h1 { font-size: 1.5rem; } h2 { font-size: 1.2rem; }
             #lobby-game-code { font-size: 1.8rem; }
             #wheel-container { transform: scale(0.8); margin: 0; }
         }
@@ -72,57 +67,54 @@
     <div class="app-container">
         <!-- ===== VISTA PROFESOR ===== -->
         <div id="profesor-view" style="display: none;">
-            <section id="init-screen-prof" class="screen active">
-                <h1>Panel del Profesor</h1><button id="create-game-btn">Crear Juego</button>
-            </section>
+            <section id="init-screen-prof" class="screen"><button id="create-game-btn">Crear Juego</button></section>
             <section id="lobby-screen-prof" class="screen">
-                <h2>Sala de Espera</h2><p>Comparte este código: <span id="lobby-game-code"></span></p>
+                <h2>Sala de Espera</h2><p>Código: <span id="lobby-game-code"></span></p>
                 <h3>Jugadores Conectados:</h3><ul id="player-lobby-list"></ul>
                 <button id="start-game-btn" disabled>Empezar Juego</button>
             </section>
             <section id="category-wheel-screen-prof" class="screen">
-                <h2>Ronda <span id="round-number">1</span>/<span id="total-rounds">5</span> - ¡Girando la ruleta!</h2>
-                <div id="wheel-container-prof"><div id="wheel-pointer"></div><div id="wheel-prof"></div></div>
+                <h2>Ronda <span id="round-number">1</span>/<span id="total-rounds">5</span></h2>
+                <div id="wheel-container"><div id="wheel-pointer"></div><div id="wheel-prof"></div></div>
             </section>
             <section id="game-screen-prof" class="screen">
-                <div id="timer-prof">20</div><h2 id="question-text-prof"></h2>
+                <div id="timer-prof"></div><h2 id="question-text-prof"></h2>
                 <p>Respuestas: <span id="response-count">0</span> / <span id="total-players">0</span></p>
                 <div id="results-chart"></div>
-                <button id="force-end-btn">Terminar y Ver Resultados</button>
+                <button id="force-end-btn">Terminar Ronda</button>
                 <button id="next-round-btn" style="display: none;">Siguiente Ronda</button>
                 <button id="show-ranking-btn" style="display: none;">Ver Ranking Final</button>
             </section>
             <section id="ranking-screen-prof" class="screen">
                 <h2>Ranking Final - Top 5</h2><ol id="scoreboard"></ol>
-                <button onclick="window.location.href=window.location.pathname + '?teach'">Crear Nuevo Juego</button>
+                <button id="restart-game-btn">Crear Nuevo Juego</button>
             </section>
         </div>
 
         <!-- ===== VISTA ESTUDIANTE ===== -->
         <div id="estudiante-view" style="display: none;">
-            <section id="join-screen-stud" class="screen active">
+            <section id="join-screen-stud" class="screen">
                 <h1>Unirse al Juego</h1>
                 <input type="text" id="player-name" placeholder="Tu Nombre" required>
                 <input type="text" id="game-code-input" placeholder="Código de la Sala" required>
                 <button id="join-btn">Unirse</button>
             </section>
             <section id="waiting-screen-stud" class="screen">
-                <h2>¡Conectado!</h2><p>Esperando que el profesor inicie el juego...</p>
+                <h2>¡Conectado!</h2><p>Esperando...</p>
             </section>
             <section id="category-wheel-screen-stud" class="screen">
                 <h2>Eligiendo categoría...</h2>
-                <div id="wheel-container-stud"><div id="wheel-pointer"></div><div id="wheel-stud"></div></div>
+                <div id="wheel-container"><div id="wheel-pointer"></div><div id="wheel-stud"></div></div>
             </section>
             <section id="question-screen-stud" class="screen">
-                <div id="question-timer-stud">20</div>
-                <h2 id="question-text-stud"></h2>
+                <div id="question-timer-stud"></div><h2 id="question-text-stud"></h2>
                 <div id="options-container"></div>
             </section>
             <section id="answer-sent-screen-stud" class="screen">
-                <h2>Respuesta enviada</h2><p>Esperando que el profesor muestre los resultados...</p>
+                <h2>Respuesta enviada</h2><p>Esperando resultados...</p>
             </section>
             <section id="end-screen-stud" class="screen">
-                <h2>¡Juego terminado!</h2><p>El profesor mostrará el ranking final.</p>
+                <h2>¡Juego terminado!</h2>
             </section>
         </div>
     </div>
@@ -153,24 +145,10 @@
             }
         });
 
-        const questionsData = { /* (Este objeto se define dentro de initProfesor) */ };
-
         // =====================================================================
-        // ======================= PROFESSOR'S CODE =========================
+        // ======================= CÓDIGO DEL PROFESOR =========================
         // =====================================================================
         function initProfesor() {
-            // (El resto del código JS va aquí)
-        }
-
-        // =====================================================================
-        // ======================= STUDENT'S CODE ============================
-        // =====================================================================
-        function initEstudiante() {
-            // (El resto del código JS va aquí)
-        }
-
-        // --- CÓDIGO JS COMPLETO ---
-        const professorJs = `
             const TOTAL_ROUNDS = 5;
             const QUESTION_TIME = 20;
             const screens = { init: document.getElementById('init-screen-prof'), lobby: document.getElementById('lobby-screen-prof'), category: document.getElementById('category-wheel-screen-prof'), game: document.getElementById('game-screen-prof'), ranking: document.getElementById('ranking-screen-prof') };
@@ -190,6 +168,7 @@
             const nextRoundBtn = document.getElementById('next-round-btn');
             const showRankingBtn = document.getElementById('show-ranking-btn');
             const scoreboard = document.getElementById('scoreboard');
+            const restartGameBtn = document.getElementById('restart-game-btn');
 
             let gameCode, currentRound = 0, totalPlayers = 0;
             let playersUnsubscribe, responsesUnsubscribe, questionTimer;
@@ -210,37 +189,40 @@
             }
 
             function buildWheel(wheelElement, categories) {
-                wheelElement.innerHTML = '';
-                const colors = ['#3498db', '#f1c40f', '#e74c3c', '#2ecc71'];
-                const degreePerSlice = 360 / categories.length;
-                const gradientParts = categories.map((cat, i) => \`\${colors[i % colors.length]} \${i * degreePerSlice}deg \${(i + 1) * degreePerSlice}deg\`);
-                wheelElement.style.background = \`conic-gradient(\${gradientParts.join(', ')})\`;
-
+                wheelElement.innerHTML = ''; const colors = ['#3498db', '#f1c40f', '#e74c3c', '#2ecc71']; const degreePerSlice = 360 / categories.length;
+                const gradientParts = categories.map((cat, i) => `${colors[i % colors.length]} ${i * degreePerSlice}deg ${(i + 1) * degreePerSlice}deg`);
+                wheelElement.style.background = `conic-gradient(${gradientParts.join(', ')})`;
                 categories.forEach((cat, i) => {
-                    const slice = document.createElement('div');
-                    slice.className = 'category-slice';
-                    slice.textContent = cat;
-                    const rotation = i * degreePerSlice + degreePerSlice / 2;
-                    slice.style.transform = \`rotate(\${rotation}deg)\`;
+                    const slice = document.createElement('div'); slice.className = 'category-slice'; slice.textContent = cat;
+                    const rotation = i * degreePerSlice + degreePerSlice / 2; slice.style.transform = `rotate(${rotation}deg)`;
                     wheelElement.appendChild(slice);
                 });
             }
 
             function switchScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
-            async function createGame() { createGameBtn.disabled = true; gameCode = Math.random().toString(36).substring(2, 7).toUpperCase(); lobbyGameCodeEl.textContent = gameCode; await db.collection('games').doc(gameCode).set({ state: 'lobby', currentQuestion: null, players: {}, selectedCategory: null }); switchScreen('lobby'); listenForPlayers(); }
-            function listenForPlayers() { playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => { const gameData = doc.data(); if (!gameData || !gameData.players) return; const players = Object.keys(gameData.players); totalPlayers = players.length; playerLobbyList.innerHTML = players.map(name => \`<li>\${name}</li>\`).join(''); startGameBtn.disabled = players.length === 0; }); }
+            async function createGame() { createGameBtn.disabled = true; gameCode = Math.random().toString(36).substring(2, 7).toUpperCase(); lobbyGameCodeEl.textContent = gameCode; await db.collection('games').doc(gameCode).set({ state: 'lobby', currentQuestion: null, players: {}, selectedCategory: null, round: 0 }); switchScreen('lobby'); listenForPlayers(); }
+            function listenForPlayers() { playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => { const gameData = doc.data(); if (!gameData || !gameData.players) return; const players = Object.keys(gameData.players); totalPlayers = players.length; playerLobbyList.innerHTML = players.map(name => `<li>${name}</li>`).join(''); startGameBtn.disabled = players.length === 0; }); }
             async function startGame() { if (playersUnsubscribe) playersUnsubscribe(); await startNewRound(); }
-            async function startNewRound() { currentRound++; if (currentRound > TOTAL_ROUNDS) { await db.collection('games').doc(gameCode).update({ state: 'finished' }); showFinalRanking(); return; } roundNumberEl.textContent = currentRound; totalRoundsEl.textContent = TOTAL_ROUNDS; const selectedCategoryIndex = Math.floor(Math.random() * categoryList.length); const selectedCategory = categoryList[selectedCategoryIndex]; await db.collection('games').doc(gameCode).update({ state: 'spinning', selectedCategory: selectedCategory }); const degreePerSlice = 360 / categoryList.length; const targetRotation = 360 * 5 - (selectedCategoryIndex * degreePerSlice + degreePerSlice / 2); wheelProf.style.transform = \`rotate(\${targetRotation}deg)\`; switchScreen('category'); setTimeout(() => selectCategoryAndLaunch(selectedCategory), 4500); }
+            async function startNewRound() { currentRound++; if (currentRound > TOTAL_ROUNDS) { await db.collection('games').doc(gameCode).update({ state: 'finished' }); showFinalRanking(); return; } roundNumberEl.textContent = currentRound; totalRoundsEl.textContent = TOTAL_ROUNDS; const selectedCategoryIndex = Math.floor(Math.random() * categoryList.length); const selectedCategory = categoryList[selectedCategoryIndex]; await db.collection('games').doc(gameCode).update({ state: 'spinning', selectedCategory: selectedCategory, round: currentRound }); const degreePerSlice = 360 / categoryList.length; const targetRotation = 360 * 5 - (selectedCategoryIndex * degreePerSlice + degreePerSlice / 2); wheelProf.style.transform = `rotate(${targetRotation}deg)`; switchScreen('category'); setTimeout(() => selectCategoryAndLaunch(selectedCategory), 4500); }
             async function selectCategoryAndLaunch(category) { const availableIndices = Object.keys(questionsData[category]).map(Number).filter(i => !usedQuestions[category].includes(i)); if (availableIndices.length === 0) usedQuestions[category] = []; const finalAvailable = Object.keys(questionsData[category]).map(Number).filter(i => !usedQuestions[category].includes(i)); const qIndex = finalAvailable[Math.floor(Math.random() * finalAvailable.length)]; usedQuestions[category].push(qIndex); const question = { ...questionsData[category][qIndex], category: category }; await db.collection('games').doc(gameCode).update({ state: 'question', currentQuestion: question }); launchQuestion(question); }
-            function launchQuestion(question) { nextRoundBtn.style.display = 'none'; showRankingBtn.style.display = 'none'; resultsChart.innerHTML = ''; forceEndBtn.style.display = 'block'; questionTextProf.textContent = \`(\${question.category}) \${question.text}\`; totalPlayersEl.textContent = totalPlayers; responseCountEl.textContent = 0; let timeLeft = QUESTION_TIME; timerProfEl.textContent = timeLeft; questionTimer = setInterval(() => { timeLeft--; timerProfEl.textContent = timeLeft; if (timeLeft <= 0) { showResults(); } }, 1000); switchScreen('game'); listenForResponses(); }
-            function listenForResponses() { const questionResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(\`r\${currentRound}\`); responsesUnsubscribe = questionResponsesRef.onSnapshot(doc => { if (!doc.exists) return; const responses = doc.data(); const responseCount = Object.keys(responses).length; responseCountEl.textContent = responseCount; if (responseCount === totalPlayers) { showResults(); } }); }
-            async function showResults() { clearInterval(questionTimer); forceEndBtn.style.display = 'none'; if (responsesUnsubscribe) responsesUnsubscribe(); const gameRef = db.collection('games').doc(gameCode); await gameRef.update({ state: 'results' }); const gameDoc = await gameRef.get(); const gameData = gameDoc.data(); const question = gameData.currentQuestion; const responsesRef = db.collection('games').doc(gameCode).collection('responses').doc(\`r\${currentRound}\`); const responsesDoc = await responsesRef.get(); const responsesData = responsesDoc.data(); let playerUpdates = {}; if (responsesData) { for (const playerName of Object.keys(gameData.players)) { const playerData = gameData.players[playerName]; const playerAnswer = responsesData[playerName]; const currentStats = { score: playerData.score || 0, correct: playerData.correct || 0, incorrect: playerData.incorrect || 0 }; if (playerAnswer === question.correct) { playerUpdates[\`players.\${playerName}\`] = { ...currentStats, score: currentStats.score + 10, correct: currentStats.correct + 1 }; } else if (playerAnswer !== undefined) { playerUpdates[\`players.\${playerName}\`] = { ...currentStats, incorrect: currentStats.incorrect + 1 }; } } } if (Object.keys(playerUpdates).length > 0) { await gameRef.update(playerUpdates); } const voteCounts = question.options.map(() => 0); if (responsesData) { for (const playerName in responsesData) { if (voteCounts[responsesData[playerName]] !== undefined) { voteCounts[responsesData[playerName]]++; } } } resultsChart.innerHTML = ''; question.options.forEach((option, index) => { const percentage = totalPlayers > 0 ? (voteCounts[index] / totalPlayers) * 100 : 0; const isCorrect = index === question.correct; const bar = document.createElement('div'); bar.className = 'bar-container'; bar.innerHTML = \`<div class="bar-label">\${option}</div><div class="bar \${isCorrect ? 'correct' : ''}" style="width: \${percentage}%;">\${voteCounts[index]}</div>\`; resultsChart.appendChild(bar); }); if (currentRound < TOTAL_ROUNDS) { nextRoundBtn.style.display = 'block'; } else { await gameRef.update({ state: 'finished' }); showRankingBtn.style.display = 'block'; } }
-            async function showFinalRanking() { const gameDoc = await db.collection('games').doc(gameCode).get(); const playersData = gameDoc.data().players; const sortedPlayers = Object.entries(playersData).map(([name, data]) => ({ name, score: data.score || 0, correct: data.correct || 0, incorrect: data.incorrect || 0 })).sort((a, b) => (b.score - a.score) || (b.correct - a.correct) || (a.incorrect - b.incorrect)); scoreboard.innerHTML = sortedPlayers.slice(0, 5).map((p, i) => \`<li><span class="player-name">\${i + 1}. \${p.name}</span><span class="player-stats">\${p.score} pts (\${p.correct} ✔ / \${p.incorrect} ✖)</span></li>\`).join(''); switchScreen('ranking'); }
+            function launchQuestion(question) { nextRoundBtn.style.display = 'none'; showRankingBtn.style.display = 'none'; resultsChart.innerHTML = ''; forceEndBtn.style.display = 'block'; questionTextProf.textContent = `(${question.category}) ${question.text}`; totalPlayersEl.textContent = totalPlayers; responseCountEl.textContent = 0; let timeLeft = QUESTION_TIME; timerProfEl.textContent = timeLeft; questionTimer = setInterval(() => { timeLeft--; timerProfEl.textContent = timeLeft; if (timeLeft <= 0) { showResults(); } }, 1000); switchScreen('game'); listenForResponses(); }
+            function listenForResponses() { const questionResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`); responsesUnsubscribe = questionResponsesRef.onSnapshot(doc => { if (!doc.exists) return; const responses = doc.data(); const responseCount = Object.keys(responses).length; responseCountEl.textContent = responseCount; if (responseCount === totalPlayers) { showResults(); } }); }
+            async function showResults() { clearInterval(questionTimer); forceEndBtn.style.display = 'none'; if (responsesUnsubscribe) responsesUnsubscribe(); const gameRef = db.collection('games').doc(gameCode); await gameRef.update({ state: 'results' }); const gameDoc = await gameRef.get(); const gameData = gameDoc.data(); const question = gameData.currentQuestion; const responsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`); const responsesDoc = await responsesRef.get(); const responsesData = responsesDoc.data(); let playerUpdates = {}; if (responsesData) { for (const playerName of Object.keys(gameData.players)) { const playerData = gameData.players[playerName]; const playerAnswer = responsesData[playerName]; const currentStats = { score: playerData.score || 0, correct: playerData.correct || 0, incorrect: playerData.incorrect || 0 }; if (playerAnswer === question.correct) { playerUpdates[`players.${playerName}`] = { ...currentStats, score: currentStats.score + 10, correct: currentStats.correct + 1 }; } else if (playerAnswer !== undefined) { playerUpdates[`players.${playerName}`] = { ...currentStats, incorrect: currentStats.incorrect + 1 }; } } } if (Object.keys(playerUpdates).length > 0) { await gameRef.update(playerUpdates); } const voteCounts = question.options.map(() => 0); if (responsesData) { for (const playerName in responsesData) { if (voteCounts[responsesData[playerName]] !== undefined) { voteCounts[responsesData[playerName]]++; } } } resultsChart.innerHTML = ''; question.options.forEach((option, index) => { const percentage = totalPlayers > 0 ? (voteCounts[index] / totalPlayers) * 100 : 0; const isCorrect = index === question.correct; const bar = document.createElement('div'); bar.className = 'bar-container'; bar.innerHTML = `<div class="bar-label">${option}</div><div class="bar ${isCorrect ? 'correct' : ''}" style="width: ${percentage}%;">${voteCounts[index]}</div>`; resultsChart.appendChild(bar); }); if (currentRound < TOTAL_ROUNDS) { nextRoundBtn.style.display = 'block'; } else { showRankingBtn.style.display = 'block'; } }
+            async function showFinalRanking() { await db.collection('games').doc(gameCode).update({ state: 'finished' }); const gameDoc = await db.collection('games').doc(gameCode).get(); const playersData = gameDoc.data().players; const sortedPlayers = Object.entries(playersData).map(([name, data]) => ({ name, score: data.score || 0, correct: data.correct || 0, incorrect: data.incorrect || 0 })).sort((a, b) => (b.score - a.score) || (b.correct - a.correct) || (a.incorrect - b.incorrect)); scoreboard.innerHTML = sortedPlayers.slice(0, 5).map((p, i) => `<li><span class="player-name">${i + 1}. ${p.name}</span><span class="player-stats">${p.score} pts (${p.correct} ✔ / ${p.incorrect} ✖)</span></li>`).join(''); switchScreen('ranking'); }
             
-            loadQuestions(); switchScreen('init'); createGameBtn.addEventListener('click', createGame); startGameBtn.addEventListener('click', startGame); forceEndBtn.addEventListener('click', showResults); nextRoundBtn.addEventListener('click', startNewRound); showRankingBtn.addEventListener('click', showFinalRanking);
-        `;
+            switchScreen('init'); loadQuestions();
+            createGameBtn.addEventListener('click', createGame);
+            startGameBtn.addEventListener('click', startGame);
+            forceEndBtn.addEventListener('click', showResults);
+            nextRoundBtn.addEventListener('click', startNewRound);
+            showRankingBtn.addEventListener('click', showFinalRanking);
+            restartGameBtn.addEventListener('click', () => window.location.href = window.location.pathname + '?teach');
+        }
 
-        const studentJs = `
+        // =====================================================================
+        // ====================== CÓDIGO DEL ESTUDIANTE ========================
+        // =====================================================================
+        function initEstudiante() {
             const QUESTION_TIME = 20;
             const screens = { join: document.getElementById('join-screen-stud'), waiting: document.getElementById('waiting-screen-stud'), category: document.getElementById('category-wheel-screen-stud'), question: document.getElementById('question-screen-stud'), answerSent: document.getElementById('answer-sent-screen-stud'), end: document.getElementById('end-screen-stud') };
             const playerNameInput = document.getElementById('player-name');
@@ -254,36 +236,24 @@
             let gameCode, playerName, gameUnsubscribe, questionTimerStud;
 
             function buildWheel(wheelElement, categories) {
-                wheelElement.innerHTML = '';
-                const colors = ['#3498db', '#f1c40f', '#e74c3c', '#2ecc71'];
-                const degreePerSlice = 360 / categories.length;
-                const gradientParts = categories.map((cat, i) => \`\${colors[i % colors.length]} \${i * degreePerSlice}deg \${(i + 1) * degreePerSlice}deg\`);
-                wheelElement.style.background = \`conic-gradient(\${gradientParts.join(', ')})\`;
-
+                wheelElement.innerHTML = ''; const colors = ['#3498db', '#f1c40f', '#e74c3c', '#2ecc71']; const degreePerSlice = 360 / categories.length;
+                const gradientParts = categories.map((cat, i) => `${colors[i % colors.length]} ${i * degreePerSlice}deg ${(i + 1) * degreePerSlice}deg`);
+                wheelElement.style.background = `conic-gradient(${gradientParts.join(', ')})`;
                 categories.forEach((cat, i) => {
-                    const slice = document.createElement('div');
-                    slice.className = 'category-slice';
-                    slice.textContent = cat;
-                    const rotation = i * degreePerSlice + degreePerSlice / 2;
-                    slice.style.transform = \`rotate(\${rotation}deg)\`;
+                    const slice = document.createElement('div'); slice.className = 'category-slice'; slice.textContent = cat;
+                    const rotation = i * degreePerSlice + degreePerSlice / 2; slice.style.transform = `rotate(${rotation}deg)`;
                     wheelElement.appendChild(slice);
                 });
             }
 
             function switchScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
-            async function joinGame() { playerName = playerNameInput.value.trim(); gameCode = gameCodeInput.value.trim().toUpperCase(); if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; } joinBtn.disabled = true; joinBtn.textContent = 'Conectando...'; try { const gameRef = db.collection('games').doc(gameCode); const gameDoc = await gameRef.get(); if (!gameDoc.exists) { throw new Error('La sala no existe.'); } await gameRef.update({ [\`players.\${playerName}\`]: { score: 0, correct: 0, incorrect: 0 } }); listenToGameChanges(); } catch (error) { alert(error.message); joinBtn.disabled = false; joinBtn.textContent = 'Unirse'; } }
-            function listenToGameChanges() { const gameRef = db.collection('games').doc(gameCode); gameUnsubscribe = gameRef.onSnapshot((doc) => { if (!doc.exists) { if (gameUnsubscribe) gameUnsubscribe(); alert("La sala ha sido cerrada."); location.reload(); return; } const gameData = doc.data(); if (gameData.state === 'lobby') { switchScreen('waiting'); } else if (gameData.state === 'spinning') { const categories = ["Virtualización", "Hipervisores", "Componentes y Ventajas", "Inteligencia Artificial"]; buildWheel(wheelStud, categories); const categoryIndex = categories.indexOf(gameData.selectedCategory); const degreePerSlice = 360 / categories.length; const targetRotation = 360 * 5 - (categoryIndex * degreePerSlice + degreePerSlice / 2); wheelStud.style.transform = \`rotate(\${targetRotation}deg)\`; switchScreen('category'); } else if (gameData.state === 'question') { displayQuestion(gameData.currentQuestion); } else if (gameData.state === 'results') { switchScreen('answerSent'); } else if (gameData.state === 'finished') { if (gameUnsubscribe) gameUnsubscribe(); switchScreen('end'); } }); }
-            function displayQuestion(question) { if (!question) return; clearInterval(questionTimerStud); questionTextStud.textContent = question.text; optionsContainer.innerHTML = ''; question.options.forEach((option, index) => { const button = document.createElement('button'); button.className = 'option-btn'; button.textContent = option; button.onclick = () => sendAnswer(index); optionsContainer.appendChild(button); }); let timeLeft = QUESTION_TIME; questionTimerStudEl.textContent = timeLeft; questionTimerStud = setInterval(() => { timeLeft--; questionTimerStudEl.textContent = timeLeft; if (timeLeft <= 0) { clearInterval(questionTimerStud); optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true); switchScreen('answerSent'); } }, 1000); switchScreen('question'); }
-            async function sendAnswer(answerIndex) { clearInterval(questionTimerStud); optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true); const gameRef = db.collection('games').doc(gameCode); const currentRoundId = \`r\${(await gameRef.get()).data().currentQuestion.category.length + (await gameRef.get()).data().currentQuestion.text.length}\`; const responseRef = gameRef.collection('responses').doc(currentRoundId); await responseRef.set({ [playerName]: answerIndex }, { merge: true }); switchScreen('answerSent'); }
+            async function joinGame() { playerName = playerNameInput.value.trim(); gameCode = gameCodeInput.value.trim().toUpperCase(); if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; } joinBtn.disabled = true; joinBtn.textContent = 'Conectando...'; try { const gameRef = db.collection('games').doc(gameCode); const gameDoc = await gameRef.get(); if (!gameDoc.exists) { throw new Error('La sala no existe.'); } await gameRef.update({ [`players.${playerName}`]: { score: 0, correct: 0, incorrect: 0 } }); listenToGameChanges(); } catch (error) { alert(error.message || 'No se pudo unir a la sala.'); joinBtn.disabled = false; joinBtn.textContent = 'Unirse'; } }
+            function listenToGameChanges() { const gameRef = db.collection('games').doc(gameCode); gameUnsubscribe = gameRef.onSnapshot((doc) => { if (!doc.exists) { if (gameUnsubscribe) gameUnsubscribe(); alert("La sala de juego ha sido cerrada."); location.reload(); return; } const gameData = doc.data(); if (gameData.state === 'lobby') { switchScreen('waiting'); } else if (gameData.state === 'spinning') { const categories = ["Virtualización", "Hipervisores", "Componentes y Ventajas", "Inteligencia Artificial"]; buildWheel(wheelStud, categories); const categoryIndex = categories.indexOf(gameData.selectedCategory); const degreePerSlice = 360 / categories.length; const targetRotation = 360 * 5 - (categoryIndex * degreePerSlice + degreePerSlice / 2); wheelStud.style.transform = `rotate(${targetRotation}deg)`; switchScreen('category'); } else if (gameData.state === 'question') { displayQuestion(gameData.currentQuestion); } else if (gameData.state === 'results') { clearInterval(questionTimerStud); switchScreen('answerSent'); } else if (gameData.state === 'finished') { if (gameUnsubscribe) gameUnsubscribe(); switchScreen('end'); } }); }
+            function displayQuestion(question) { if (!question || !question.text) return; clearInterval(questionTimerStud); questionTextStud.textContent = question.text; optionsContainer.innerHTML = ''; question.options.forEach((option, index) => { const button = document.createElement('button'); button.className = 'option-btn'; button.textContent = option; button.onclick = () => sendAnswer(index); optionsContainer.appendChild(button); }); let timeLeft = QUESTION_TIME; questionTimerStudEl.textContent = timeLeft; questionTimerStud = setInterval(() => { timeLeft--; questionTimerStudEl.textContent = timeLeft; if (timeLeft <= 0) { clearInterval(questionTimerStud); optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true); sendAnswer(null); } }, 1000); switchScreen('question'); }
+            async function sendAnswer(answerIndex) { clearInterval(questionTimerStud); optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true); const gameRef = db.collection('games').doc(gameCode); const gameDoc = await gameRef.get(); const currentRoundId = `r${gameDoc.data().round}`; const responseRef = gameRef.collection('responses').doc(currentRoundId); await responseRef.set({ [playerName]: answerIndex }, { merge: true }); switchScreen('answerSent'); }
             
-            switchScreen('join'); joinBtn.addEventListener('click', joinGame);
-        `;
-
-        // Inyectar el código correcto basado en el rol
-        if (document.getElementById('profesor-view').style.display === 'block') {
-            eval(professorJs);
-        } else {
-            eval(studentJs);
+            switchScreen('join');
+            joinBtn.addEventListener('click', joinGame);
         }
     </script>
 </body>
