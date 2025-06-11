@@ -16,8 +16,9 @@
         button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
         /* Estilos específicos del profesor */
-        #game-code { color: var(--color-primary); font-size: 3rem; font-weight: bold; letter-spacing: 5px; background: #eee; padding: 1rem; border-radius: 10px; }
-        #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; }
+        #lobby-header { margin-bottom: 2rem; }
+        #lobby-game-code { color: var(--color-primary); font-weight: bold; background-color: #eee; padding: 10px 20px; border-radius: 8px; font-size: 2.5rem; font-family: 'Courier New', Courier, monospace; letter-spacing: 4px; }
+        #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; max-width: 600px; }
         #player-lobby-list li { background: #e0e0e0; padding: 0.5rem 1rem; border-radius: 20px; }
         #results-chart { width: 100%; max-width: 600px; margin-top: 1rem; }
         .bar-container { display: flex; align-items: center; margin-bottom: 0.5rem; }
@@ -38,16 +39,16 @@
         <div id="profesor-view" style="display: none;">
             <section id="init-screen-prof" class="screen">
                 <h1>Panel del Profesor</h1>
-                <p>Crea una sala de juego y comparte el código con tus estudiantes.</p>
+                <p>Crea una nueva sala de juego para empezar.</p>
                 <button id="create-game-btn">Crear Juego</button>
-                <div id="game-code-display" style="display:none;">
-                    <h2>Código de la Sala: <span id="game-code"></span></h2>
-                    <p>Los estudiantes deben entrar a la URL principal (sin `?teach`).</p>
-                </div>
             </section>
             <section id="lobby-screen-prof" class="screen">
-                <h2>Sala de Espera</h2>
-                <p>Jugadores conectados:</p>
+                <div id="lobby-header">
+                    <h2>Sala de Espera</h2>
+                    <p>Comparte este código con tus estudiantes:</p>
+                    <p><span id="lobby-game-code"></span></p>
+                </div>
+                <h3>Jugadores Conectados:</h3>
                 <ul id="player-lobby-list"></ul>
                 <button id="start-game-btn" disabled>Empezar Juego (mín. 1 jugador)</button>
             </section>
@@ -124,8 +125,7 @@
         function initProfesor() {
             const screens = { init: document.getElementById('init-screen-prof'), lobby: document.getElementById('lobby-screen-prof'), game: document.getElementById('game-screen-prof'), ranking: document.getElementById('ranking-screen-prof') };
             const createGameBtn = document.getElementById('create-game-btn');
-            const gameCodeDisplay = document.getElementById('game-code-display');
-            const gameCodeEl = document.getElementById('game-code');
+            const lobbyGameCodeEl = document.getElementById('lobby-game-code');
             const playerLobbyList = document.getElementById('player-lobby-list');
             const startGameBtn = document.getElementById('start-game-btn');
             const questionTextProf = document.getElementById('question-text-prof');
@@ -154,9 +154,8 @@
             async function createGame() {
                 createGameBtn.disabled = true;
                 gameCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-                gameCodeEl.textContent = gameCode;
-                gameCodeDisplay.style.display = 'block';
-
+                lobbyGameCodeEl.textContent = gameCode;
+                
                 await db.collection('games').doc(gameCode).set({
                     state: 'lobby',
                     currentQuestion: -1,
