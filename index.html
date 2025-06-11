@@ -28,11 +28,13 @@
         button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
 
-        #wheel-container { position: relative; width: 300px; height: 300px; margin: 1rem auto; }
-        #wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.2); transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; }
-        .category-slice { position: absolute; width: 50%; height: 50%; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; transform-origin: 100% 100%; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); padding-right: 20px; text-align: right; }
-        #wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--color-secondary); z-index: 10; }
+        /* --- Ruleta de Categorías --- */
+        .wheel-container { position: relative; width: 300px; height: 300px; margin: 1rem auto; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.2); transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1); position: relative; }
+        .category-slice { position: absolute; width: 50%; height: 50%; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; transform-origin: 100% 100%; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); padding-right: 20px; text-align: right; user-select: none; }
+        .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--color-secondary); z-index: 10; }
 
+        /* --- Estilos del Juego (Profesor) --- */
         #lobby-game-code { color: var(--color-primary); font-weight: bold; background-color: #eee; padding: 10px 20px; border-radius: 8px; font-size: 2.5rem; font-family: 'Courier New', Courier, monospace; letter-spacing: 4px; }
         #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 2rem; max-width: 600px; }
         #player-lobby-list li { background: #e0e0e0; padding: 0.5rem 1rem; border-radius: 20px; }
@@ -51,15 +53,16 @@
         #scoreboard .player-name { font-size: 1.2rem; }
         #scoreboard .player-stats { font-size: 0.9rem; color: #555; text-align: right; }
         
-        #question-text-stud { font-size: 1.5rem; margin: 1rem 0; word-wrap: break-word; overflow-y: auto; max-height: 150px; }
+        /* --- CORRECCIÓN BUG 1: Texto cortado --- */
+        #question-text-stud { font-size: 1.5rem; margin: 1rem 0; width: 100%; word-wrap: break-word; overflow-y: auto; max-height: 150px; }
         #options-container { display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%; max-width: 400px; }
         .option-btn { width: 100%; padding: 1.2rem; font-size: 1.1rem; }
 
         @media (max-width: 600px) {
-            .app-container { border-radius: 0; margin: 0; height: 100%; max-height: 100%;}
+            .app-container { border-radius: 0; margin: 0; height: 100svh; max-height: none; }
             h1 { font-size: 1.5rem; } h2 { font-size: 1.2rem; }
             #lobby-game-code { font-size: 1.8rem; }
-            #wheel-container { transform: scale(0.8); margin: 0; }
+            .wheel-container { transform: scale(0.8); margin: 0; }
         }
     </style>
 </head>
@@ -74,8 +77,8 @@
                 <button id="start-game-btn" disabled>Empezar Juego</button>
             </section>
             <section id="category-wheel-screen-prof" class="screen">
-                <h2>Ronda <span id="round-number">1</span>/<span id="total-rounds">5</span></h2>
-                <div id="wheel-container"><div id="wheel-pointer"></div><div id="wheel-prof"></div></div>
+                <h2>Ronda <span id="round-number">1</span>/<span id="total-rounds">5</span> - ¡Girando!</h2>
+                <div class="wheel-container"><div class="wheel-pointer"></div><div id="wheel-prof" class="wheel"></div></div>
             </section>
             <section id="game-screen-prof" class="screen">
                 <div id="timer-prof"></div><h2 id="question-text-prof"></h2>
@@ -99,23 +102,17 @@
                 <input type="text" id="game-code-input" placeholder="Código de la Sala" required>
                 <button id="join-btn">Unirse</button>
             </section>
-            <section id="waiting-screen-stud" class="screen">
-                <h2>¡Conectado!</h2><p>Esperando...</p>
-            </section>
+            <section id="waiting-screen-stud" class="screen"><h2>¡Conectado!</h2><p>Esperando...</p></section>
             <section id="category-wheel-screen-stud" class="screen">
                 <h2>Eligiendo categoría...</h2>
-                <div id="wheel-container"><div id="wheel-pointer"></div><div id="wheel-stud"></div></div>
+                <div class="wheel-container"><div class="wheel-pointer"></div><div id="wheel-stud" class="wheel"></div></div>
             </section>
             <section id="question-screen-stud" class="screen">
                 <div id="question-timer-stud"></div><h2 id="question-text-stud"></h2>
                 <div id="options-container"></div>
             </section>
-            <section id="answer-sent-screen-stud" class="screen">
-                <h2>Respuesta enviada</h2><p>Esperando resultados...</p>
-            </section>
-            <section id="end-screen-stud" class="screen">
-                <h2>¡Juego terminado!</h2>
-            </section>
+            <section id="answer-sent-screen-stud" class="screen"><h2>Respuesta enviada</h2><p>Esperando resultados...</p></section>
+            <section id="end-screen-stud" class="screen"><h2>¡Juego terminado!</h2></section>
         </div>
     </div>
 
@@ -145,9 +142,6 @@
             }
         });
 
-        // =====================================================================
-        // ======================= CÓDIGO DEL PROFESOR =========================
-        // =====================================================================
         function initProfesor() {
             const TOTAL_ROUNDS = 5;
             const QUESTION_TIME = 20;
@@ -172,9 +166,7 @@
 
             let gameCode, currentRound = 0, totalPlayers = 0;
             let playersUnsubscribe, responsesUnsubscribe, questionTimer;
-            let questionsData = {};
-            let usedQuestions = {};
-            let categoryList = [];
+            let questionsData = {}, usedQuestions = {}, categoryList = [];
 
             function loadQuestions() {
                 questionsData = {
@@ -204,12 +196,13 @@
             function listenForPlayers() { playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => { const gameData = doc.data(); if (!gameData || !gameData.players) return; const players = Object.keys(gameData.players); totalPlayers = players.length; playerLobbyList.innerHTML = players.map(name => `<li>${name}</li>`).join(''); startGameBtn.disabled = players.length === 0; }); }
             async function startGame() { if (playersUnsubscribe) playersUnsubscribe(); await startNewRound(); }
             async function startNewRound() { currentRound++; if (currentRound > TOTAL_ROUNDS) { await db.collection('games').doc(gameCode).update({ state: 'finished' }); showFinalRanking(); return; } roundNumberEl.textContent = currentRound; totalRoundsEl.textContent = TOTAL_ROUNDS; const selectedCategoryIndex = Math.floor(Math.random() * categoryList.length); const selectedCategory = categoryList[selectedCategoryIndex]; await db.collection('games').doc(gameCode).update({ state: 'spinning', selectedCategory: selectedCategory, round: currentRound }); const degreePerSlice = 360 / categoryList.length; const targetRotation = 360 * 5 - (selectedCategoryIndex * degreePerSlice + degreePerSlice / 2); wheelProf.style.transform = `rotate(${targetRotation}deg)`; switchScreen('category'); setTimeout(() => selectCategoryAndLaunch(selectedCategory), 4500); }
-            async function selectCategoryAndLaunch(category) { const availableIndices = Object.keys(questionsData[category]).map(Number).filter(i => !usedQuestions[category].includes(i)); if (availableIndices.length === 0) usedQuestions[category] = []; const finalAvailable = Object.keys(questionsData[category]).map(Number).filter(i => !usedQuestions[category].includes(i)); const qIndex = finalAvailable[Math.floor(Math.random() * finalAvailable.length)]; usedQuestions[category].push(qIndex); const question = { ...questionsData[category][qIndex], category: category }; await db.collection('games').doc(gameCode).update({ state: 'question', currentQuestion: question }); launchQuestion(question); }
+            async function selectCategoryAndLaunch(category) { const availableIndices = Object.keys(questionsData[category]).map(Number).filter(i => !usedQuestions[category].includes(i)); let finalAvailable = availableIndices; if (availableIndices.length === 0) { usedQuestions[category] = []; finalAvailable = Object.keys(questionsData[category]).map(Number); } const qIndex = finalAvailable[Math.floor(Math.random() * finalAvailable.length)]; usedQuestions[category].push(qIndex); const question = { ...questionsData[category][qIndex], category: category }; await db.collection('games').doc(gameCode).update({ state: 'question', currentQuestion: question }); }
+            function listenToGameState() { db.collection('games').doc(gameCode).onSnapshot(doc => { const gameData = doc.data(); if(gameData.state === 'question') launchQuestion(gameData.currentQuestion); }); }
             function launchQuestion(question) { nextRoundBtn.style.display = 'none'; showRankingBtn.style.display = 'none'; resultsChart.innerHTML = ''; forceEndBtn.style.display = 'block'; questionTextProf.textContent = `(${question.category}) ${question.text}`; totalPlayersEl.textContent = totalPlayers; responseCountEl.textContent = 0; let timeLeft = QUESTION_TIME; timerProfEl.textContent = timeLeft; questionTimer = setInterval(() => { timeLeft--; timerProfEl.textContent = timeLeft; if (timeLeft <= 0) { showResults(); } }, 1000); switchScreen('game'); listenForResponses(); }
             function listenForResponses() { const questionResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`); responsesUnsubscribe = questionResponsesRef.onSnapshot(doc => { if (!doc.exists) return; const responses = doc.data(); const responseCount = Object.keys(responses).length; responseCountEl.textContent = responseCount; if (responseCount === totalPlayers) { showResults(); } }); }
-            async function showResults() { clearInterval(questionTimer); forceEndBtn.style.display = 'none'; if (responsesUnsubscribe) responsesUnsubscribe(); const gameRef = db.collection('games').doc(gameCode); await gameRef.update({ state: 'results' }); const gameDoc = await gameRef.get(); const gameData = gameDoc.data(); const question = gameData.currentQuestion; const responsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`); const responsesDoc = await responsesRef.get(); const responsesData = responsesDoc.data(); let playerUpdates = {}; if (responsesData) { for (const playerName of Object.keys(gameData.players)) { const playerData = gameData.players[playerName]; const playerAnswer = responsesData[playerName]; const currentStats = { score: playerData.score || 0, correct: playerData.correct || 0, incorrect: playerData.incorrect || 0 }; if (playerAnswer === question.correct) { playerUpdates[`players.${playerName}`] = { ...currentStats, score: currentStats.score + 10, correct: currentStats.correct + 1 }; } else if (playerAnswer !== undefined) { playerUpdates[`players.${playerName}`] = { ...currentStats, incorrect: currentStats.incorrect + 1 }; } } } if (Object.keys(playerUpdates).length > 0) { await gameRef.update(playerUpdates); } const voteCounts = question.options.map(() => 0); if (responsesData) { for (const playerName in responsesData) { if (voteCounts[responsesData[playerName]] !== undefined) { voteCounts[responsesData[playerName]]++; } } } resultsChart.innerHTML = ''; question.options.forEach((option, index) => { const percentage = totalPlayers > 0 ? (voteCounts[index] / totalPlayers) * 100 : 0; const isCorrect = index === question.correct; const bar = document.createElement('div'); bar.className = 'bar-container'; bar.innerHTML = `<div class="bar-label">${option}</div><div class="bar ${isCorrect ? 'correct' : ''}" style="width: ${percentage}%;">${voteCounts[index]}</div>`; resultsChart.appendChild(bar); }); if (currentRound < TOTAL_ROUNDS) { nextRoundBtn.style.display = 'block'; } else { showRankingBtn.style.display = 'block'; } }
+            async function showResults() { clearInterval(questionTimer); forceEndBtn.style.display = 'none'; if (responsesUnsubscribe) responsesUnsubscribe(); const gameRef = db.collection('games').doc(gameCode); await gameRef.update({ state: 'results' }); const gameDoc = await gameRef.get(); const gameData = gameDoc.data(); const question = gameData.currentQuestion; const responsesRef = db.collection('games').doc(gameCode).collection('responses').doc(`r${currentRound}`); const responsesDoc = await responsesRef.get(); const responsesData = responsesDoc.data() || {}; let playerUpdates = {}; for (const playerName of Object.keys(gameData.players)) { const playerData = gameData.players[playerName]; const playerAnswer = responsesData[playerName]; const currentStats = { score: playerData.score || 0, correct: playerData.correct || 0, incorrect: playerData.incorrect || 0 }; if (playerAnswer === question.correct) { playerUpdates[`players.${playerName}`] = { ...currentStats, score: currentStats.score + 10, correct: currentStats.correct + 1 }; } else if (playerAnswer !== undefined) { playerUpdates[`players.${playerName}`] = { ...currentStats, incorrect: currentStats.incorrect + 1 }; } else { playerUpdates[`players.${playerName}`] = { ...currentStats, incorrect: currentStats.incorrect + 1 }; } } if (Object.keys(playerUpdates).length > 0) { await gameRef.update(playerUpdates); } const voteCounts = question.options.map(() => 0); for (const playerName in responsesData) { if (voteCounts[responsesData[playerName]] !== undefined) { voteCounts[responsesData[playerName]]++; } } resultsChart.innerHTML = ''; question.options.forEach((option, index) => { const percentage = totalPlayers > 0 ? (voteCounts[index] / totalPlayers) * 100 : 0; const isCorrect = index === question.correct; const bar = document.createElement('div'); bar.className = 'bar-container'; bar.innerHTML = `<div class="bar-label">${option}</div><div class="bar ${isCorrect ? 'correct' : ''}" style="width: ${percentage}%;">${voteCounts[index]}</div>`; resultsChart.appendChild(bar); }); if (currentRound < TOTAL_ROUNDS) { nextRoundBtn.style.display = 'block'; } else { showRankingBtn.style.display = 'block'; } }
             async function showFinalRanking() { await db.collection('games').doc(gameCode).update({ state: 'finished' }); const gameDoc = await db.collection('games').doc(gameCode).get(); const playersData = gameDoc.data().players; const sortedPlayers = Object.entries(playersData).map(([name, data]) => ({ name, score: data.score || 0, correct: data.correct || 0, incorrect: data.incorrect || 0 })).sort((a, b) => (b.score - a.score) || (b.correct - a.correct) || (a.incorrect - b.incorrect)); scoreboard.innerHTML = sortedPlayers.slice(0, 5).map((p, i) => `<li><span class="player-name">${i + 1}. ${p.name}</span><span class="player-stats">${p.score} pts (${p.correct} ✔ / ${p.incorrect} ✖)</span></li>`).join(''); switchScreen('ranking'); }
-            
+
             switchScreen('init'); loadQuestions();
             createGameBtn.addEventListener('click', createGame);
             startGameBtn.addEventListener('click', startGame);
@@ -247,8 +240,8 @@
             }
 
             function switchScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
-            async function joinGame() { playerName = playerNameInput.value.trim(); gameCode = gameCodeInput.value.trim().toUpperCase(); if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; } joinBtn.disabled = true; joinBtn.textContent = 'Conectando...'; try { const gameRef = db.collection('games').doc(gameCode); const gameDoc = await gameRef.get(); if (!gameDoc.exists) { throw new Error('La sala no existe.'); } await gameRef.update({ [`players.${playerName}`]: { score: 0, correct: 0, incorrect: 0 } }); listenToGameChanges(); } catch (error) { alert(error.message || 'No se pudo unir a la sala.'); joinBtn.disabled = false; joinBtn.textContent = 'Unirse'; } }
-            function listenToGameChanges() { const gameRef = db.collection('games').doc(gameCode); gameUnsubscribe = gameRef.onSnapshot((doc) => { if (!doc.exists) { if (gameUnsubscribe) gameUnsubscribe(); alert("La sala de juego ha sido cerrada."); location.reload(); return; } const gameData = doc.data(); if (gameData.state === 'lobby') { switchScreen('waiting'); } else if (gameData.state === 'spinning') { const categories = ["Virtualización", "Hipervisores", "Componentes y Ventajas", "Inteligencia Artificial"]; buildWheel(wheelStud, categories); const categoryIndex = categories.indexOf(gameData.selectedCategory); const degreePerSlice = 360 / categories.length; const targetRotation = 360 * 5 - (categoryIndex * degreePerSlice + degreePerSlice / 2); wheelStud.style.transform = `rotate(${targetRotation}deg)`; switchScreen('category'); } else if (gameData.state === 'question') { displayQuestion(gameData.currentQuestion); } else if (gameData.state === 'results') { clearInterval(questionTimerStud); switchScreen('answerSent'); } else if (gameData.state === 'finished') { if (gameUnsubscribe) gameUnsubscribe(); switchScreen('end'); } }); }
+            async function joinGame() { playerName = playerNameInput.value.trim(); gameCode = gameCodeInput.value.trim().toUpperCase(); if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; } joinBtn.disabled = true; joinBtn.textContent = 'Conectando...'; try { const gameRef = db.collection('games').doc(gameCode); const gameDoc = await gameRef.get(); if (!gameDoc.exists) { throw new Error('La sala no existe. Verifica el código.'); } await gameRef.update({ [`players.${playerName}`]: { score: 0, correct: 0, incorrect: 0 } }); listenToGameChanges(); } catch (error) { alert(error.message || 'No se pudo unir a la sala.'); joinBtn.disabled = false; joinBtn.textContent = 'Unirse'; } }
+            function listenToGameChanges() { const gameRef = db.collection('games').doc(gameCode); gameUnsubscribe = gameRef.onSnapshot((doc) => { if (!doc.exists) { if (gameUnsubscribe) gameUnsubscribe(); alert("La sala ha sido cerrada."); location.reload(); return; } const gameData = doc.data(); if (gameData.state === 'lobby') { switchScreen('waiting'); } else if (gameData.state === 'spinning') { const categories = ["Virtualización", "Hipervisores", "Componentes y Ventajas", "Inteligencia Artificial"]; buildWheel(wheelStud, categories); const categoryIndex = categories.indexOf(gameData.selectedCategory); const degreePerSlice = 360 / categories.length; const targetRotation = 360 * 5 - (categoryIndex * degreePerSlice + degreePerSlice / 2); wheelStud.style.transform = `rotate(${targetRotation}deg)`; switchScreen('category'); } else if (gameData.state === 'question') { displayQuestion(gameData.currentQuestion); } else if (gameData.state === 'results') { clearInterval(questionTimerStud); switchScreen('answerSent'); } else if (gameData.state === 'finished') { if (gameUnsubscribe) gameUnsubscribe(); switchScreen('end'); } }); }
             function displayQuestion(question) { if (!question || !question.text) return; clearInterval(questionTimerStud); questionTextStud.textContent = question.text; optionsContainer.innerHTML = ''; question.options.forEach((option, index) => { const button = document.createElement('button'); button.className = 'option-btn'; button.textContent = option; button.onclick = () => sendAnswer(index); optionsContainer.appendChild(button); }); let timeLeft = QUESTION_TIME; questionTimerStudEl.textContent = timeLeft; questionTimerStud = setInterval(() => { timeLeft--; questionTimerStudEl.textContent = timeLeft; if (timeLeft <= 0) { clearInterval(questionTimerStud); optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true); sendAnswer(null); } }, 1000); switchScreen('question'); }
             async function sendAnswer(answerIndex) { clearInterval(questionTimerStud); optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true); const gameRef = db.collection('games').doc(gameCode); const gameDoc = await gameRef.get(); const currentRoundId = `r${gameDoc.data().round}`; const responseRef = gameRef.collection('responses').doc(currentRoundId); await responseRef.set({ [playerName]: answerIndex }, { merge: true }); switchScreen('answerSent'); }
             
