@@ -3,67 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handshake</title>
+    <title>Jugar Trivia - UTN</title>
     <style>
-        :root { --color-primary: #005A9C; --color-secondary: #0D223F; --color-accent: #FFC107; --color-light: #f4f4f4; --color-dark: #333; --color-correct: #28a745; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--color-light); color: var(--color-dark); display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; margin: 0; }
-        #app-container { width: 100%; max-width: 800px; margin: 1rem; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; position: relative; min-height: 500px; }
-        .view { display: none; padding: 2rem; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: opacity 0.4s ease-in-out; opacity: 0; }
-        .view.active { display: flex; opacity: 1; z-index: 1; }
-        h1, h2, h3 { color: var(--color-secondary); margin-bottom: 1rem; word-break: break-word; }
+        :root { --color-primary: #005A9C; --color-secondary: #0D223F; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--color-light, #f4f4f4); color: var(--color-dark, #333); display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
+        #app-container { width: 100%; max-width: 500px; margin: 1rem; background-color: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .screen { display: none; padding: 2rem; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; }
+        .screen.active { display: flex; }
+        h1, h2 { color: var(--color-secondary); margin-bottom: 1rem; }
         p { margin-bottom: 1.5rem; line-height: 1.6; color: #555; }
-        button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; margin-top: 10px; }
-        button:disabled { background-color: #aaa; cursor: not-allowed; }
-        input { width: 100%; padding: 0.8rem; border: 2px solid #ccc; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; text-align: center; max-width: 300px; }
-        /* --- Estilos del Profesor --- */
-        #lobby-header { width: 90%; padding: 1rem; background-color: #f0f0f0; border-radius: 10px; margin-bottom: 1.5rem; }
-        #game-code { color: var(--color-primary); font-size: 2.5rem; font-weight: bold; letter-spacing: 5px; user-select: all; }
-        #player-lobby-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 1.5rem; }
-        #player-lobby-list li { background: #e0e0e0; padding: 0.5rem 1rem; border-radius: 20px; }
-        #results-chart { width: 100%; max-width: 600px; margin-top: 1rem; }
-        .bar-container { display: flex; align-items: center; margin-bottom: 0.5rem; }
-        .bar-label { width: 25%; text-align: right; padding-right: 10px; font-size: 0.9em; }
-        .bar { height: 30px; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; border-radius: 0 5px 5px 0; transition: width 0.5s ease; }
-        .bar.correct { background-color: var(--color-correct); }
-        #scoreboard { list-style: none; width: 100%; max-width: 500px; padding: 0; text-align: left; }
-        #scoreboard li { background-color: var(--color-light); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; font-weight: bold; }
-        .rank-name { font-size: 1.2rem; } .rank-details { font-size: 0.9rem; color: #555; }
-        
-        /* --- RULETA DE CATEGORÍAS --- */
-        #roulette-container { height: 100px; width: 100%; max-width: 400px; border: 3px solid var(--color-secondary); border-radius: 10px; overflow: hidden; position: relative; margin-bottom: 1rem; }
-        #roulette-reel { position: absolute; top: 0; left: 0; width: 100%; transition: top 4s cubic-bezier(0.25, 1, 0.5, 1); }
-        .roulette-item { height: 100px; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; font-weight: bold; padding: 0 10px; }
-        #roulette-pointer { position: absolute; top: 50%; left: -10px; transform: translateY(-50%); width: 0; height: 0; border-top: 15px solid transparent; border-bottom: 15px solid transparent; border-left: 15px solid var(--color-primary); }
-        
-        /* --- TEMPORIZADOR --- */
-        .timer-display { font-size: 1.5rem; font-weight: bold; color: var(--color-primary); margin: 0.5rem 0; }
-        
-        /* --- Estilos del Estudiante --- */
+        input { width: 100%; padding: 0.8rem; border: 2px solid #ccc; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; text-align: center; }
+        button { background-color: var(--color-primary); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        button:disabled { background-color: #aaa; }
         #options-container { display: grid; grid-template-columns: 1fr; gap: 1rem; width: 100%; }
         .option-btn { width: 100%; padding: 1.2rem; font-size: 1.1rem; }
-        #stud-question-text { font-size: 1.2rem; }
     </style>
 </head>
 <body>
     <main id="app-container">
-        <!-- VISTA DEL PROFESOR -->
-        <div id="profesor-view" class="view">
-            <section id="prof-init-screen" class="view active"><h1>Ping-guntados UTN</h1><p>Crea una sala de juego para empezar la trivia.</p><button id="create-game-btn">Crear Juego</button></section>
-            <section id="prof-lobby-screen" class="view"><div id="lobby-header"><h3>Pide a los estudiantes que usen la URL base e ingresen este código:</h3><p><strong id="game-code"></strong></p></div><h2>Sala de Espera</h2><p>Jugadores conectados:</p><ul id="player-lobby-list"></ul><button id="start-game-btn" disabled>Empezar Juego</button></section>
-            <section id="prof-category-roulette-screen" class="view"><h2>Eligiendo Categoría...</h2><div id="roulette-container"><div id="roulette-reel"></div><div id="roulette-pointer"></div></div><button id="spin-roulette-btn">Girar Ruleta</button></section>
-            <section id="prof-game-screen" class="view"><h2 id="question-text-prof"></h2><div id="prof-timer-display" class="timer-display">30</div><p>Respuestas: <span id="response-count">0</span> / <span id="total-players">0</span></p><div id="results-chart"></div><button id="end-question-now-btn">Finalizar Pregunta</button><button id="next-question-btn" style="display: none;">Siguiente</button></section>
-            <section id="prof-ranking-screen" class="view"><h2>Ranking Final (Top 5)</h2><ol id="scoreboard"></ol><button onclick="location.href = location.pathname + '?profesor'">Crear Nuevo Juego</button></section>
-        </div>
+        <section id="join-screen" class="screen active">
+            <h1>Unirse al Juego</h1>
+            <input type="text" id="player-name" placeholder="Tu Nombre" required>
+            <input type="text" id="game-code-input" placeholder="Código de la Sala" required>
+            <button id="join-btn">Unirse</button>
+        </section>
 
-        <!-- VISTA DEL ESTUDIANTE -->
-        <div id="estudiante-view" class="view">
-            <section id="stud-join-screen" class="view active"><h1>Ping-guntados UTN</h1><p>Ingresa tu nombre y el código de la sala.</p><input type="text" id="player-name" placeholder="Tu Nombre" required><input type="text" id="game-code-input" placeholder="Código de la Sala" required><button id="join-btn">Unirse</button></section>
-            <section id="stud-waiting-screen" class="view"><h2>¡Conectado!</h2><p>Esperando que el profesor inicie el juego...</p></section>
-            <section id="stud-category-wait-screen" class="view"><h2>El profesor está eligiendo una categoría...</h2><p>¡Prepárate!</p></section>
-            <section id="stud-question-screen" class="view"><h2 id="stud-question-text"></h2><div id="stud-timer-display" class="timer-display">30</div><div id="options-container"></div></section>
-            <section id="stud-answer-sent-screen" class="view"><h2>Respuesta enviada</h2><p>Esperando los resultados...</p></section>
-            <section id="stud-end-screen" class="view"><h2>¡Juego terminado!</h2><p>El profesor mostrará el ranking final en la pantalla principal.</p></section>
-        </div>
+        <section id="waiting-screen" class="screen">
+            <h2>¡Conectado!</h2>
+            <p>Esperando que el profesor inicie el juego...</p>
+        </section>
+
+        <section id="question-screen" class="screen">
+            <div id="options-container"></div>
+        </section>
+        
+        <section id="answer-sent-screen" class="screen">
+            <h2>Respuesta enviada</h2>
+            <p>Esperando los resultados...</p>
+        </section>
+
+        <section id="end-screen" class="screen">
+            <h2>¡Juego terminado!</h2>
+            <p>El profesor mostrará el ranking final.</p>
+        </section>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -82,321 +64,125 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        const questionsByCategory = {
-            'Conceptos de Virtualización': [
-                { text: '¿Qué describe el concepto de virtualización?', options: ['Coordinar recursos para que varios SO funcionen en una sola PC.', 'Acelerar la velocidad de un único sistema operativo.', 'Conectar varias computadoras físicas en una red.', 'Proteger la computadora con un antivirus avanzado.'], correct: 0 },
-                { text: '¿Qué crea el software de virtualización sobre el hardware?', options: ['Una partición física en el disco duro.', 'Una conexión a internet más rápida.', 'Una capa de abstracción.', 'Un nuevo sistema operativo.'], correct: 2 },
-                { text: 'Según el texto, una Máquina Virtual (VM) se comporta como:', options: ['Un programa que depende del SO anfitrión.', 'Una computadora independiente con su propio SO.', 'Un simple contenedor de archivos.', 'Un periférico de hardware, como una impresora.'], correct: 1 },
-                { text: 'Una de las principales ventajas de la virtualización es que permite a las organizaciones...', options: ['Comprar computadoras más baratas.', 'Particionar un equipo físico en varias máquinas virtuales.', 'Eliminar la necesidad de tener memoria RAM.', 'Diseñar sus propios procesadores.'], correct: 1 },
-                { text: '¿Desde qué década data la técnica de la virtualización, según la introducción?', options: ['La década del 80.', 'La década del 90.', 'La década del 60.', 'La década del 2000.'], correct: 2 },
-                { text: 'La virtualización es una práctica estándar y muy utilizada en entornos de...', options: ['Gaming y entretenimiento.', 'Computación personal básica.', '"Cloud" o la nube.', 'Edición de video profesional.'], correct: 2 },
-                { text: '¿Qué permite el "encapsulamiento" en una VM?', options: ['Que la VM sea sumamente portátil, como si fuera un archivo.', 'Que la VM tenga más memoria que el hardware físico.', 'Que la VM se conecte directamente al hardware.', 'Que la VM no necesite un sistema operativo.'], correct: 0 }
-            ],
-            'Hipervisores y Componentes': [
-                { text: '¿Cómo se conoce también a un hipervisor?', options: ['Supervisor de Máquina Virtual (VMM).', 'Gestor de Sistema Operativo (OSM).', 'Coordinador de Hardware (HCM).', 'Aplicación Virtual (VA).'], correct: 0 },
-                { text: 'Un hipervisor de Tipo 1 (Bare Metal) se ejecuta...', options: ['Como una aplicación dentro de Windows o Linux.', 'Directamente sobre el hardware del host.', 'Exclusivamente desde un pendrive.', 'Solo en la nube pública.'], correct: 1 },
-                { text: '¿Cuál de los siguientes es un ejemplo de hipervisor de Tipo 2 (Alojado)?', options: ['VMware ESXi.', 'Microsoft Hyper-V (en su versión de servidor).', 'Oracle VirtualBox.', 'KVM.'], correct: 2 },
-                { text: 'En la terminología de virtualización, ¿cómo se denomina al hardware físico que usa un hipervisor?', options: ['Guest (Invitado).', 'Client (Cliente).', 'Node (Nodo).', 'Host (Anfitrión).'], correct: 3 },
-                { text: '¿Qué componente de la virtualización gestiona los recursos físicos como CPU y RAM?', options: ['La Máquina Virtual (VM).', 'El Sistema Operativo invitado.', 'El Hipervisor.', 'El Hardware Subyacente por sí mismo.'], correct: 2 },
-                { text: '¿Qué característica define principalmente el Aislamiento en las VMs?', options: ['Que si una VM falla, las demás en el mismo host no se ven afectadas.', 'Que las VMs no pueden acceder a internet.', 'Que cada VM debe ser de un fabricante diferente.', 'Que las VMs no pueden compartir archivos entre sí.'], correct: 0 },
-                { text: 'KVM, Microsoft Hyper-V y VMware vSphere son ejemplos de hipervisores de tipo...', options: ['Tipo 2 (Alojado).', 'Tipo 1 (Bare Metal).', 'Tipo 3 (Híbrido).', 'Tipo 4 (En la nube).'], correct: 1 }
-            ],
-            'Fundamentos de IA': [
-                { text: '¿A qué se refiere la Inteligencia Artificial (IA), según la introducción del tema?', options: ['A la creación de robots físicos únicamente.', 'A la simulación de la inteligencia humana mediante máquinas.', 'A la velocidad de procesamiento de una computadora.', 'A la capacidad de almacenar grandes cantidades de datos.'], correct: 1 },
-                { text: 'Una IA que se enfoca en una tarea específica (como reconocimiento facial) se clasifica como:', options: ['IA General o Fuerte (AGI).', 'IA Débil o Estrecha (ANI).', 'Superinteligencia Artificial (ASI).', 'IA Reactiva.'], correct: 1 },
-                { text: '¿Quién acuñó el término "Inteligencia Artificial" en la década de 1950?', options: ['Alan Turing.', 'John McCarthy.', 'Isaac Asimov.', 'Steve Jobs.'], correct: 1 },
-                { text: 'Un sistema de recomendación de películas en una plataforma de streaming es un ejemplo de:', options: ['IA General, porque entiende de cine.', 'IA Débil, porque se especializa en una tarea.', 'Superinteligencia, porque es mejor que un humano.', 'IA que no existe todavía.'], correct: 1 },
-                { text: '¿Cuál de las siguientes NO es una de las características de la IA mencionadas?', options: ['Capacidad de aprender.', 'Capacidad de razonar.', 'Capacidad de tener emociones.', 'Capacidad de resolver problemas.'], correct: 2 },
-                { text: 'Un ejemplo de IA Reactiva, que no aprende de nuevas situaciones, es:', options: ['El asistente Siri de Apple.', 'Deep Blue de IBM, que jugó ajedrez contra Kasparov.', 'Un sistema de vehículo autónomo.', 'Un chatbot de atención al cliente.'], correct: 1 },
-                { text: '¿Cuál es el objetivo final de la investigación en IA General o Fuerte (AGI)?', options: ['Cumplir con cualquier tarea intelectual que un humano puede hacer.', 'Ser mejor que los humanos en todas las tareas posibles.', 'Reemplazar todos los trabajos humanos con máquinas.', 'Crear el filtro de spam perfecto.'], correct: 0 }
-            ],
-            'Machine Learning y Redes Neuronales': [
-                { text: 'El Machine Learning es considerado un subconjunto de:', options: ['La programación tradicional.', 'La Inteligencia Artificial.', 'El almacenamiento en la nube.', 'El Procesamiento de Lenguaje Natural.'], correct: 1 },
-                { text: '¿Cuál es la principal diferencia entre Machine Learning y programación tradicional?', options: ['ML es más lento.', 'ML utiliza más memoria RAM.', 'En ML, el sistema aprende de datos sin ser programado explícitamente.', 'ML solo funciona con números.'], correct: 2 },
-                { text: 'El aprendizaje "supervisado" se refiere a aplicaciones donde...', options: ['El modelo no conoce los resultados y debe descubrirlos.', 'Un humano debe supervisar cada decisión del modelo.', 'Se conoce el resultado de los datos usados para construir el modelo.', 'El modelo necesita ser reiniciado constantemente.'], correct: 2 },
-                { text: '¿Qué tecnología utiliza redes neuronales con múltiples capas para analizar datos complejos?', options: ['Deep Learning.', 'Regresión Lineal.', 'Árboles de Decisión.', 'Virtualización de escritorios.'], correct: 0 },
-                { text: '¿Qué es el Procesamiento de Lenguaje Natural (PNL o NLP)?', options: ['Un antivirus especializado en texto.', 'Un campo que estudia las interacciones entre computadoras y lenguaje humano.', 'Un tipo de hardware para procesar voz.', 'Un lenguaje de programación como Python o Java.'], correct: 1 },
-                { text: 'ChatGPT, mencionado en el texto, es un producto conocido dentro del campo de:', options: ['La virtualización de servidores.', 'Las redes definidas por software (SDN).', 'La IA Generativa (Gen AI).', 'La robótica industrial.'], correct: 2 },
-                { text: 'Uno de los riesgos de modelos como ChatGPT es la "alucinación", que significa:', options: ['Que el modelo se ralentiza por exceso de datos.', 'Que genera contenido que parece correcto pero es falso.', 'Que muestra imágenes en lugar de texto.', 'Que se apaga por sobrecalentamiento.'], correct: 1 }
-            ]
-        };
+        let gameCode = null;
+        let playerName = null;
+        let gameUnsubscribe = null;
 
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('profesor')) {
-                document.getElementById('profesor-view').style.display = 'block';
-                document.getElementById('profesor-view').querySelector('.view').classList.add('active');
-                document.getElementById('estudiante-view').style.display = 'none';
-                initProfesor();
-            } else {
-                document.getElementById('estudiante-view').style.display = 'block';
-                document.getElementById('estudiante-view').querySelector('.view').classList.add('active');
-                document.getElementById('profesor-view').style.display = 'none';
-                initEstudiante();
-            }
-        };
+        const screens = { join: document.getElementById('join-screen'), waiting: document.getElementById('waiting-screen'), question: document.getElementById('question-screen'), answerSent: document.getElementById('answer-sent-screen'), end: document.getElementById('end-screen') };
+        const playerNameInput = document.getElementById('player-name');
+        const gameCodeInput = document.getElementById('game-code-input');
+        const joinBtn = document.getElementById('join-btn');
+        const optionsContainer = document.getElementById('options-container');
 
-        function initProfesor() {
-            const createGameBtn = document.getElementById('create-game-btn');
-            const startGameBtn = document.getElementById('start-game-btn');
-            const spinRouletteBtn = document.getElementById('spin-roulette-btn');
-            const endQuestionNowBtn = document.getElementById('end-question-now-btn');
-            const nextQuestionBtn = document.getElementById('next-question-btn');
-            const showRankingBtn = document.getElementById('show-ranking-btn');
-            let gameCode, currentCategory, currentQuestionIndex = 0, playersUnsubscribe, responsesUnsubscribe, totalPlayers = 0;
-            let availableCategories = [];
-            let questionTimerInterval = null;
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
 
-            function switchProfScreen(id) {
-                document.querySelectorAll('#profesor-view .view').forEach(s => { s.classList.remove('active'); });
-                document.getElementById(id).classList.add('active');
+        async function joinGame() {
+            playerName = playerNameInput.value.trim();
+            gameCode = gameCodeInput.value.trim().toUpperCase();
+
+            if (!playerName || !gameCode) {
+                alert('Por favor, ingresa tu nombre y el código de la sala.');
+                return;
             }
 
-            async function createGame() {
-                createGameBtn.disabled = true;
-                gameCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-                document.getElementById('game-code').textContent = gameCode;
-                availableCategories = Object.keys(questionsByCategory);
-                await db.collection('games').doc(gameCode).set({
-                    state: 'lobby',
-                    currentCategory: null,
-                    currentQuestion: null,
-                    players: {},
-                    questionsByCategory: questionsByCategory,
-                    availableCategories: availableCategories
-                });
-                switchProfScreen('prof-lobby-screen');
-                listenForPlayers();
-            }
+            joinBtn.disabled = true;
+            joinBtn.textContent = 'Conectando...';
 
-            function listenForPlayers() {
-                playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => {
-                    const players = doc.data()?.players ? Object.keys(doc.data().players) : [];
-                    totalPlayers = players.length;
-                    document.getElementById('player-lobby-list').innerHTML = players.map(name => `<li>${name}</li>`).join('');
-                    startGameBtn.disabled = totalPlayers === 0;
-                });
-            }
-            
-            async function startGame() {
-                if (playersUnsubscribe) playersUnsubscribe();
-                await db.collection('games').doc(gameCode).update({ state: 'category_selection' });
-                switchProfScreen('prof-category-roulette-screen');
-                setupRoulette();
-            }
-            
-            function setupRoulette() {
-                const reel = document.getElementById('roulette-reel');
-                const choices = [...availableCategories, ...availableCategories, ...availableCategories].sort(() => 0.5 - Math.random());
-                reel.innerHTML = choices.map(cat => `<div class="roulette-item">${cat}</div>`).join('');
-                reel.style.top = '0px'; // Reset position
-                spinRouletteBtn.disabled = false;
-            }
-
-            async function spinRoulette() {
-                spinRouletteBtn.disabled = true;
-                const reel = document.getElementById('roulette-reel');
-                const itemHeight = 100;
-                const randomIndex = Math.floor(Math.random() * availableCategories.length);
-                currentCategory = availableCategories[randomIndex];
-                
-                // Animate to a random item of the chosen category
-                let targetIndex = -1;
-                for(let i=reel.children.length - availableCategories.length; i<reel.children.length; i++){
-                    if(reel.children[i].textContent === currentCategory){
-                        targetIndex = i;
-                        break;
-                    }
-                }
-                const targetPosition = targetIndex * itemHeight;
-                reel.style.top = `-${targetPosition}px`;
-
-                availableCategories.splice(randomIndex, 1);
-                currentQuestionIndex = 0;
-                await db.collection('games').doc(gameCode).update({
-                    currentCategory: currentCategory,
-                    availableCategories: availableCategories,
-                });
-                setTimeout(() => launchQuestion(), 4500);
-            }
-
-            async function launchQuestion() {
-                endQuestionNowBtn.style.display = 'block';
-                nextQuestionBtn.style.display = 'none';
-                document.getElementById('results-chart').innerHTML = '';
-                const question = questionsByCategory[currentCategory][currentQuestionIndex];
-                await db.collection('games').doc(gameCode).update({
-                    state: 'question',
-                    currentQuestion: question,
-                    questionStartTime: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                document.getElementById('question-text-prof').textContent = question.text;
-                document.getElementById('total-players').textContent = totalPlayers;
-                document.getElementById('response-count').textContent = 0;
-                switchProfScreen('prof-game-screen');
-                startTimer(30);
-                listenForResponses();
-            }
-
-            function startTimer(duration) {
-                if (questionTimerInterval) clearInterval(questionTimerInterval);
-                let timeLeft = duration;
-                const timerDisplay = document.getElementById('prof-timer-display');
-                timerDisplay.textContent = timeLeft;
-                questionTimerInterval = setInterval(() => {
-                    timeLeft--;
-                    timerDisplay.textContent = timeLeft;
-                    if (timeLeft <= 0) {
-                        showResults();
-                    }
-                }, 1000);
-            }
-
-            function listenForResponses() {
-                const qResponsesRef = db.collection('games').doc(gameCode).collection('responses').doc(currentCategory + currentQuestionIndex);
-                responsesUnsubscribe = qResponsesRef.onSnapshot(doc => {
-                    const responseCount = doc.exists ? Object.keys(doc.data()).length : 0;
-                    document.getElementById('response-count').textContent = responseCount;
-                    if (responseCount >= totalPlayers) showResults();
-                });
-            }
-
-            async function showResults() {
-                if (questionTimerInterval) clearInterval(questionTimerInterval);
-                if (responsesUnsubscribe) responsesUnsubscribe();
-                endQuestionNowBtn.style.display = 'none';
-
-                const question = questionsByCategory[currentCategory][currentQuestionIndex];
-                const responsesDoc = await db.collection('games').doc(gameCode).collection('responses').doc(currentCategory + currentQuestionIndex).get();
-                const responsesData = responsesDoc.exists ? responsesDoc.data() : {};
-                
+            try {
                 const gameRef = db.collection('games').doc(gameCode);
                 const gameDoc = await gameRef.get();
-                let playersData = gameDoc.data().players;
-                
-                for (const name in playersData) {
-                    const answer = responsesData[name];
-                    if (answer !== undefined) {
-                        if (answer === question.correct) {
-                            playersData[name].score += 10; playersData[name].correct += 1;
-                        } else { playersData[name].incorrect += 1; }
-                    } else { playersData[name].incorrect += 1; }
+
+                if (!gameDoc.exists) {
+                    alert('La sala no existe. Verifica el código.');
+                    joinBtn.disabled = false;
+                    joinBtn.textContent = 'Unirse';
+                    return;
                 }
                 
-                await gameRef.update({ players: playersData, state: 'results' });
-
-                const voteCounts = question.options.map(() => 0);
-                for (const name in responsesData) voteCounts[responsesData[name]]++;
-                document.getElementById('results-chart').innerHTML = question.options.map((opt, i) => `<div class="bar-container"><div class="bar-label">${opt}</div><div class="bar ${i === question.correct ? 'correct' : ''}" style="width: ${totalPlayers > 0 ? (voteCounts[i] / totalPlayers) * 100 : 0}%;">${voteCounts[i]}</div></div>`).join('');
-                
-                if (currentQuestionIndex < questionsByCategory[currentCategory].length - 1) {
-                    nextQuestionBtn.textContent = `Siguiente Pregunta`;
-                    nextQuestionBtn.style.display = 'block';
-                } else if (availableCategories.length > 0) {
-                    nextQuestionBtn.textContent = `Siguiente Categoría`;
-                    nextQuestionBtn.style.display = 'block';
-                } else {
-                    showRankingBtn.style.display = 'block';
-                    gameRef.update({ state: 'finished' });
-                }
-            }
-            
-            async function showFinalRanking() {
-                const playersData = (await db.collection('games').doc(gameCode).get()).data().players;
-                const sorted = Object.entries(playersData).sort((a, b) => b[1].score - a[1].score).slice(0, 5);
-                document.getElementById('scoreboard').innerHTML = sorted.map(([name, data], i) => `<li><span class="rank-name">${i + 1}. ${name}</span><span class="rank-details">${data.score} pts (Aciertos: ${data.correct}, Errores: ${data.incorrect})</span></li>`).join('');
-                switchProfScreen('prof-ranking-screen');
-            }
-
-            createGameBtn.addEventListener('click', createGame);
-            startGameBtn.addEventListener('click', startGame);
-            spinRouletteBtn.addEventListener('click', spinRoulette);
-            endQuestionNowBtn.addEventListener('click', showResults);
-            nextQuestionBtn.addEventListener('click', () => {
-                if (currentQuestionIndex < questionsByCategory[currentCategory].length - 1) {
-                    currentQuestionIndex++;
-                    launchQuestion();
-                } else {
-                    db.collection('games').doc(gameCode).update({ state: 'category_selection' });
-                    switchProfScreen('prof-category-roulette-screen');
-                    setupRoulette();
-                }
-            });
-            showRankingBtn.addEventListener('click', showFinalRanking);
-        }
-
-        function initEstudiante() {
-            const playerNameInput = document.getElementById('player-name');
-            const gameCodeInput = document.getElementById('game-code-input');
-            const joinBtn = document.getElementById('join-btn');
-            let gameCode, playerName, gameUnsubscribe, timerInterval;
-
-            function switchStudScreen(id) {
-                document.querySelectorAll('#estudiante-view .view').forEach(s => s.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
-            }
-            async function joinGame() {
-                playerName = playerNameInput.value.trim();
-                gameCode = gameCodeInput.value.trim().toUpperCase();
-                if (!playerName || !gameCode) { alert('Ingresa tu nombre y el código de la sala.'); return; }
-                joinBtn.disabled = true; joinBtn.textContent = 'Conectando...';
-                try {
-                    const gameRef = db.collection('games').doc(gameCode);
-                    if (!(await gameRef.get()).exists) { throw new Error('La sala no existe.'); }
-                    await gameRef.set({ players: { [playerName]: { score: 0, correct: 0, incorrect: 0 } } }, { merge: true });
-                    listenToGameChanges();
-                    switchStudScreen('stud-waiting-screen');
-                } catch (error) {
-                    alert(error.message);
-                    joinBtn.disabled = false; joinBtn.textContent = 'Unirse';
-                }
-            }
-            function listenToGameChanges() {
-                gameUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => {
-                    const gameData = doc.data();
-                    if (!gameData) { location.reload(); return; }
-                    switch(gameData.state) {
-                        case 'lobby': switchStudScreen('stud-waiting-screen'); break;
-                        case 'category_selection': switchStudScreen('stud-category-wait-screen'); break;
-                        case 'question':
-                            const qKey = gameData.currentCategory + gameData.questionsByCategory[gameData.currentCategory].findIndex(q => q.text === gameData.currentQuestion.text);
-                            db.collection('games').doc(gameCode).collection('responses').doc(qKey).get().then(responseDoc => {
-                                if (responseDoc.exists && responseDoc.data()[playerName] !== undefined) switchStudScreen('stud-answer-sent-screen');
-                                else displayQuestion(gameData);
-                            });
-                            break;
-                        case 'results': switchStudScreen('stud-answer-sent-screen'); break;
-                        case 'finished': if(gameUnsubscribe) gameUnsubscribe(); switchStudScreen('stud-end-screen'); break;
-                    }
+                // --- CORRECCIÓN CLAVE ---
+                // Usamos `update` con "dot notation" para añadir un jugador al mapa `players`
+                // sin borrar los que ya existen. Las comillas invertidas (`) son importantes.
+                await gameRef.update({
+                    [`players.${playerName}`]: 0
                 });
+
+                listenToGameChanges();
+                switchScreen('waiting');
+
+            } catch (error) {
+                console.error("Error al unirse a la sala:", error);
+                alert("Hubo un error al conectar. Revisa la consola o intenta de nuevo.");
+                joinBtn.disabled = false;
+                joinBtn.textContent = 'Unirse';
             }
-            function displayQuestion(gameData) {
-                if (timerInterval) clearInterval(timerInterval);
-                const question = gameData.currentQuestion;
-                const startTime = gameData.questionStartTime.toDate();
-                const timerDisplay = document.getElementById('stud-timer-display');
-                const optionsContainer = document.getElementById('options-container');
-                document.getElementById('stud-question-text').textContent = question.text;
-                optionsContainer.innerHTML = question.options.map((opt, i) => `<button class="option-btn" onclick="sendAnswer(${i})">${opt}</button>`).join('');
-                
-                timerInterval = setInterval(() => {
-                    const timeLeft = 30 - Math.floor((new Date() - startTime) / 1000);
-                    timerDisplay.textContent = timeLeft >= 0 ? timeLeft : 0;
-                    if (timeLeft <= 0) clearInterval(timerInterval);
-                }, 500);
-                switchStudScreen('stud-question-screen');
-            }
-            window.sendAnswer = async (answerIndex) => {
-                if (timerInterval) clearInterval(timerInterval);
-                document.querySelectorAll('#options-container button').forEach(btn => btn.disabled = true);
-                const gameDoc = await db.collection('games').doc(gameCode).get();
-                const gameData = gameDoc.data();
-                const qKey = gameData.currentCategory + gameData.questionsByCategory[gameData.currentCategory].findIndex(q => q.text === gameData.currentQuestion.text);
-                await db.collection('games').doc(gameCode).collection('responses').doc(qKey).set({ [playerName]: answerIndex }, { merge: true });
-                switchStudScreen('stud-answer-sent-screen');
-            };
-            joinBtn.addEventListener('click', joinGame);
         }
+
+        function listenToGameChanges() {
+            const gameRef = db.collection('games').doc(gameCode);
+            gameUnsubscribe = gameRef.onSnapshot((doc) => {
+                const gameData = doc.data();
+                if (!gameData) {
+                    // El juego fue borrado o hubo un error
+                    if (gameUnsubscribe) gameUnsubscribe();
+                    alert("La sala de juego ha sido cerrada.");
+                    location.reload();
+                    return;
+                }
+
+                if (gameData.state === 'question') {
+                    // Verifica si el jugador ya respondió a esta pregunta
+                    const responseRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${gameData.currentQuestion}`);
+                    responseRef.get().then(responseDoc => {
+                        if (responseDoc.exists && responseDoc.data()[playerName] !== undefined) {
+                            switchScreen('answerSent');
+                        } else {
+                            const question = gameData.questions[gameData.currentQuestion];
+                            displayQuestion(question);
+                        }
+                    });
+                } else if (gameData.state === 'finished') {
+                    if (gameUnsubscribe) gameUnsubscribe();
+                    switchScreen('end');
+                }
+            }, (error) => {
+                console.error("Error de conexión con la sala:", error);
+                alert("Se perdió la conexión con la sala.");
+                location.reload();
+            });
+        }
+        
+        function displayQuestion(question) {
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => sendAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+            switchScreen('question');
+        }
+        
+        async function sendAnswer(answerIndex) {
+            // Deshabilitar botones para evitar doble respuesta
+            optionsContainer.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+            const gameData = (await db.collection('games').doc(gameCode).get()).data();
+            const questionIndex = gameData.currentQuestion;
+            
+            const responseRef = db.collection('games').doc(gameCode).collection('responses').doc(`q${questionIndex}`);
+            
+            await responseRef.set({
+                [playerName]: answerIndex
+            }, { merge: true });
+
+            switchScreen('answerSent');
+        }
+
+        joinBtn.addEventListener('click', joinGame);
     </script>
 </body>
 </html>
