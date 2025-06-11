@@ -61,7 +61,7 @@
             <section id="ranking-screen-prof" class="screen">
                 <h2>Ranking Final</h2>
                 <ol id="scoreboard"></ol>
-                <button onclick="window.location.href=window.location.pathname">Crear Nuevo Juego</button>
+                <button onclick="window.location.href=window.location.pathname + '?teach'">Crear Nuevo Juego</button>
             </section>
         </div>
 
@@ -107,7 +107,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // --- LÓGICA DE ENRUTAMIENTO ---
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('teach')) {
@@ -172,6 +171,7 @@
             function listenForPlayers() {
                 playersUnsubscribe = db.collection('games').doc(gameCode).onSnapshot(doc => {
                     const gameData = doc.data();
+                    if (!gameData) return;
                     const players = gameData.players ? Object.keys(gameData.players) : [];
                     totalPlayers = players.length;
                     playerLobbyList.innerHTML = players.map(name => `<li>${name}</li>`).join('');
@@ -243,7 +243,9 @@
                 const voteCounts = question.options.map(() => 0);
                 if (responsesData) {
                     for (const playerName in responsesData) {
-                        voteCounts[responsesData[playerName]]++;
+                        if (voteCounts[responsesData[playerName]] !== undefined) {
+                            voteCounts[responsesData[playerName]]++;
+                        }
                     }
                 }
 
